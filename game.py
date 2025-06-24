@@ -19,6 +19,7 @@ from flask_socketio import SocketIO, emit, join_room
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
