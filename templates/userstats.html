@@ -1,0 +1,84 @@
+{% extends 'base2.html' %}
+
+{% block title %}User Stats Page{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #2b2b2b;
+    }
+    .table {
+        padding-top: 5vh; /* Changed to vh for spacing */
+        text-align: center;
+    }
+    .table-container {
+        overflow-x: auto;
+        margin: auto;
+    }
+    table {
+        width: 90%;
+        border-collapse: collapse;
+        min-width: 40vw; /* Adjusted to vw for minimum width */
+        margin: auto;
+    }
+    th {
+        background-color: rgb(85, 85, 85);
+        font-size: 3vh; /* Adjusted to vh for font size */
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 2vh; /* Adjusted to vh for padding */
+        font-weight: 150;
+        color: #ffa500;
+    }
+    td {
+        text-align: center;
+        padding: 1.5vh; /* Adjusted to vh for padding */
+        color: white;
+        border: 0.1vw solid #ddd; /* Adjusted to vw for border thickness */
+    }
+    @media screen and (max-width: 950px) {
+        th {
+            font-size: 2vh; /* Smaller font size for smaller screens */
+        }
+    }
+    @media screen and (max-width: 460px) {
+        th {
+            font-size: 1.5vh; /* Smaller font size for smaller screens */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="table">
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>S.no</th>
+                    <th>Game ID</th>
+                    <th>Score</th>
+                    <th>Position</th>
+                    <th>Time Played (in minutes)</th>
+                </tr>
+                {% if games %}
+                    {% for game in games %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ game.game_id }}</td>
+                        <td>{{ game.score }}</td>
+                        <td>{{ game.position }}</td>
+                        <td>{{ game.time_played }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5">No games played yet</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

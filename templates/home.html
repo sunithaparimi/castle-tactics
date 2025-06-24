@@ -1,0 +1,682 @@
+{% extends 'base2.html' %}
+{% block title %} During game Page {% endblock %}
+{% block styles %}
+
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  
+
+   <style>
+  .coins, .time, .hints {
+    padding-left: 1%;
+    margin-left: 1%;
+    padding-right: 1%;
+    margin-right: 1%;
+    margin-top: 1%;
+    border: solid black;
+    border-radius: 30px;
+    width: 8vw;
+    height: 40px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+.time {
+    float: left;
+}
+
+.coins, .hints {
+    float: right;
+}
+
+.container::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+@media screen and (max-width: 715px) {
+    .coins, .time, .hints {
+        width: 15vw; 
+        height: 30px; 
+        margin-top: 20px;
+    }
+    .details{
+      display:none !important;
+    }
+    .whitedetails, .blackdetails {
+      display: block; 
+  }
+}
+@media screen and (min-width: 715px){
+  .medium-screen-details{
+    display: none;
+  }
+  .whitedetails-content {
+    display :none !important;
+  }
+  .blackdetails-content {
+    display :none !important;
+  }
+
+}
+  .details {
+    padding: 20px 1%;
+    display: flex;
+    justify-content: space-between;
+  }
+  .player-game-details {
+    padding-left: 90%;
+  }
+  .player-game-details, .opponent-game-details{
+    font-size: 17px;
+    font-family: Arial, Helvetica, sans-serif;
+    border: solid black;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 0;
+  }
+  .detail-box {
+    width:150px;
+    padding: 15px; 
+    margin-bottom: 10px; 
+    border: solid black;
+    border-radius: 5px; 
+  }
+  .whites{
+    padding-left: 90%;
+    padding-right: 10px;
+  }
+  .blacks{
+    padding-top: 360px;
+  }
+  .table {
+    padding-top: 50px; 
+    text-align: center;
+}
+.table-container {
+    overflow-x: auto; 
+    margin: auto;
+}
+table {
+    width: 90%; 
+    border-collapse: collapse; 
+    min-width: 400px; 
+    margin: auto; 
+}
+th {
+    font-size: 20px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 10px;
+    font-weight: 150;
+    border: 1px solid #ddd;
+}
+td {
+    text-align: center; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+}
+@media screen and (max-width: 811px){
+    th{
+        font-size: 15px;
+    }
+}
+.whitedetails, .blackdetails{
+  display: none;
+}
+.whitedetails.open, .blackdetails.open {
+  display: block;
+}
+.whitedetails-content {
+  position: absolute;
+  top: 50px;
+  height: 150px;
+  width: 90%;
+  background-color: rgb(250, 250, 250);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start;
+  padding: 20px; 
+}
+.blackdetails-content {
+  position: absolute;
+  bottom: 20px;
+  height: 150px;
+  width: 90%;
+  background-color: rgb(250, 250, 250);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start;
+  padding: 20px; 
+}
+.close-whitedetails{
+  padding-left: 90%;
+}
+#board{
+  padding-left: 7%;
+}
+.white-1e1d7 {
+  background-color: white;
+}
+
+.black-3c85d {
+  background-color: #E6E6FA; 
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 50%;
+  top: 15%;
+  width: 40%;
+  border: 2px solid #333;
+  background-color: white;
+  padding: 10px 20px;
+  transform: translate(-50%, -50%);
+}
+
+.modal-content {
+ margin-bottom: 20px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+.apply-hint {
+  padding: 10px 20px;
+  background-color: #e1e1f6;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.apply-hint:hover {
+  background-color:  #cfcff2;
+}
+
+.apply-hint {
+  display: flex;
+  justify-content: space-between;
+}
+
+.apply-hint button {
+  margin: 0 10px;
+}
+
+</style>
+
+{% endblock %}
+{% block content %}
+<div class="container">
+<div class="coins" title=" Number of available coins">
+  <svg width="75" height="25" viewBox="0 0 0 0" style="color:#E4AB00" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="26px" height="26px" viewBox="0 0 256 256" fill="#E4AB00" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#E4AB00"><path fill="currentColor" d="M184 89.57V84c0-25.08-37.83-44-88-44S8 58.92 8 84v40c0 20.89 26.25 37.49 64 42.46V172c0 25.08 37.83 44 88 44s88-18.92 88-44v-40c0-20.7-25.42-37.32-64-42.43Zm-128 57.3C36.41 141.4 24 132.39 24 124v-14.07c8.16 5.78 19.09 10.44 32 13.57Zm80-23.37c12.91-3.13 23.84-7.79 32-13.57V124c0 8.39-12.41 17.4-32 22.87Zm-16 71.37c-19.59-5.47-32-14.48-32-22.87v-4.17c2.63.1 5.29.17 8 .17c3.88 0 7.67-.13 11.39-.35a121.92 121.92 0 0 0 12.61 3.76Zm0-44.62A163
+       163 0 0 1 96 152a163 163 0 0 1-24-1.75v-23.79A183.74 183.74 0 0 0 96 128a183.74 183.74 0 0 0 24-1.54Zm64 48a165.45 165.45 0 0 1-48 0V174.4a179.48 179.48 0 0 0 24 1.6a183.74 183.74 0 0 0 24-1.54ZM232 172c0 8.39-12.41 17.4-32 22.87V171.5c12.91-3.13 23.84-7.79 32-13.57Z"/></g></svg>
+</div>
+<div class="time" title="Game Timer">
+  <svg width="80" height="25" viewBox="0 0 0 0" style="color:#1C2033" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="26px" height="26px" viewBox="0 0 24 24" fill="#1C2033" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="#1C2033">
+    <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 5.75a7.25 7.25 0 1 0 0 14.5a7.25 7.25 0 0 0 0-14.5ZM3.25 13a8.75 8.75 0 1 1 17.5 0a8.75 8.75 0 0 1-17.5 0Z"/><path d="M12 7.25a.75.75 0 0 1 .75.75v4.584l2.648 1.655a.75.75 0 1 1-.796 1.272l-3-1.875A.75.75 0 0 1 11.25 13V8a.75.75 0 0 1 .75-.75ZM6.53 3.47a.75.75 0 0 1 0 1.06l-2.5 2.5a.75.75 0 0 1-1.06-1.06l2.5-2.5a.75.75 0 0 1 1.06 0Zm10.94 0a.75.75 0 0 0 0 1.06l2.5 2.5a.75.75 0 1 0 1.06-1.06l-2.5-2.5a.75.75 0 0 0-1.06 0Z"/></g></g></svg>
+</div>
+<div class="hints" title="Hints" onclick="generateHints()"> 
+    <svg width="80" height="25" viewBox="0 0 0 0" style="color:#1C2033" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="26px" height="26px" viewBox="0 0 24 24" fill="#1C2033" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="#1C2033">
+      <path fill="currentColor" d="M13 22h-3v-3h3v3Zm0-5h-3v-.007c0-1.65 0-3.075.672-4.073a6.304 6.304 0 0 1 1.913-1.62c.334-.214.649-.417.914-.628a3.712 3.712 0 0 0 1.332-3.824A3.033 3.033 0 0 0 9 8H6a6 6 0 0 1 6-6a6.04 6.04 0 0 1 5.434 3.366a6.017 6.017 0 0 1-.934 6.3c-.453.502-.96.95-1.514 1.337a7.248 7.248 0 0 0-1.316 1.167A4.23 4.23 0 0 0 13 17Z"/></g></svg>
+</div>
+</div>
+<div id="hintModal" class="modal" style="display:none;">
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Suggested Moves</h2>
+      <ul id="hint-list"></ul>
+      <button id="apply-hint" class="apply-hint" style="display:none;">Apply Hint</button>
+  </div>
+</div>
+
+
+<div class="details">
+  <div class="opponent-game-details">
+    <p>White's Username:</p>
+    <div class="detail-box"></div>
+    
+    <p>Score:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Moves:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Checks:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Dead:</p>
+    <div class="detail-box"></div>
+  </div>
+
+  <div id="board" style="width: 500px"></div>
+  <div id="move-history" style="margin-top: 20px;"></div>
+
+ 
+  <div class="player-game-details">
+    <p>Black's Username:</p>
+    <div class="detail-box"></div>
+    
+    <p>Score:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Moves:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Checks:</p>
+    <div class="detail-box"></div>
+    
+    <p>No. of Dead:</p>
+    <div class="detail-box"></div>
+  </div>
+</div>
+
+<div class="medium-screen-details">
+  <div class="whites" id="whites">
+    <svg width="30" height="30" viewBox="0 0 10 30" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 20 20" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">
+    <path fill="currentColor" d="M10 3a1 1 0 0 1 1-1h.5c.385 0 .737.145 1.002.384A1.494 1.494 0 0 1 13.505 2h.99c.385 0 .737.145 1.003.384A1.494 1.494 0 0 1 16.5 2h.5a1 1 0 0 1 1 1v2.5a2.5 2.5 0 0 1-1.95 2.44c.284 4.043 1.7 6.585 2.187 7.35c.16.252.263.553.263.877v.333A1.5 1.5 0 0 1 17 18h-5.476a2.44 2.44 0 0 0 .435-1H17a.5.5 0 0 0 .5-.5v-.333a.637.637 0 0 0-.107-.34c-.573-.9-2.155-3.774-2.369-8.304A.5.5 0 0 1 15.518 7A1.5 1.5 0 0 0 17 5.5V3h-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 1-1 .003V4.5l-.005-1.002a.5.5 0 0 0-.5-.498h-.99a.5.5 0 0 0-.5.498L13 4.502a.5.5 0 0 1-1-.003v-1a.5.5 0 0 0-.5-.5H11v2.5A1.5 1.5 0 0 0 12.482 7a.5.5 0 0 1 .494.523c-.158 3.34-1.06 5.779-1.752 7.191a2.817 2.817 0 0 0-.203-.188a4.192 4.192 0 0 1-.55-.558c.588-1.278 1.288-3.315 1.479-6.029A2.505 2.505 0 0 
+    1 10 5.5V3ZM4.5 8a2 2 0 1 1 3.6 1.2a.5.5 0 0 0 .4.8H9a.5.5 0 0 1 0 1H7.893a.5.5 0 0 0-.496.56c.302 2.47 1.609 3.888 2.34 4.5c.175.146.263.33.263.489a.451.451 0 0 1-.451.451H3.45a.451.451 0 0 1-.45-.451c0-.16.088-.343.262-.489c.732-.612 2.04-2.03 2.341-4.5a.5.5 0 0 0-.496-.56H4a.5.5 0 0 1 0-1h.5a.5.5 0 0 0 .4-.8A1.989 1.989 0 0 1 4.5 8Zm2-3a3 3 0 0 0-2.817 4.034A1.5 1.5 0 0 0 4 12h.52c-.372 1.798-1.353 2.836-1.9 3.293c-.346.29-.62.736-.62 1.256C2 17.35 2.65 18 3.451 18H9.55c.8 0 1.45-.65 1.45-1.451c0-.52-.274-.966-.62-1.256c-.547-.457-1.528-1.495-1.9-3.293H9a1.5 1.5 0 0 0 .317-2.966A3 3 0 0 0 6.5 5Z"/></g></svg>
+  </div>
+  <div class="blacks" id="blacks">
+  <svg width="10" height="10" viewBox="0 0 10 30" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 20 20" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">
+    <path fill="currentColor" d="M10.5 2a.5.5 0 0 0-.5.5v2.6c0 1.377.927 2.536 2.19 2.89c-.22 2.74-1.012 4.785-1.661 6.046c.184.216.357.377.492.49c.519.434.979 1.141.979 2.023A2.44 2.44 0 0 1 11.524 18H17a1.5 1.5 0 0 0 1.5-1.5v-.307c0-.348-.119-.669-.302-.932c-.54-.777-2.069-3.29-2.389-7.272A3.001 3.001 0 0 0 18 5.1V2.5a.5.5 0 0 0-.5-.5h-.75a.75.75 0 0 0-.75.75v.75a.5.5 0 0 1-1 .002V3.5l-.004-.754a.75.75 0 0 0-.75-.746h-.492a.75.75 0 0 0-.75.746L13 3.502a.5.5 0 0 1-1-.002v-.75a.75.75 0 0 0-.75-.75h-.75Zm-4 3a3 3 0 0 0-2.236 5H4a1 1 0 1 0 0 2h.52c-.372 1.798-1.353 2.836-1.9 3.293c-.346.29-.62.736-.62 1.256C2 17.35 2.65 18 3.451 18H9.55c.8 0 1.45-.65 1.45-1.451c0-.52-.274-.966-.62-1.256c-.547-.457-1.528-1.495-1.9-3.293H9a1 1 0 1 0 0-2h-.264A3 3 0 0 0 6.5 5Z"/></g></svg>
+  </div>
+</div>
+
+<div id="whitedetails" class="whitedetails">
+  <div class="whitedetails-content">
+    <div class="close-whitedetails">
+      <svg width="10" height="10" viewBox="0 0 10 10" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 24 24"
+       fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor" onclick="closewhitedetails()">
+          <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/></g></svg>
+  </div>
+      <table>
+        <tr>
+          <th>Player Username</th>
+          <th>Score</th>
+          <th>No.of Moves</th>
+          <th>No.of Checks</th>
+          <th>No.of Dead</th>
+        </tr>
+        <tr>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+        </tr>
+      </table>
+  </div>
+</div>
+<div id="blackdetails" class="blackdetails">
+  <div class="blackdetails-content">
+    <div class="close-blackdetails">
+      <svg width="10" height="10" viewBox="0 0 10 10" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 24 24"
+       fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor" onclick="closeblackdetails()">
+          <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/></g></svg>
+  </div>
+      <table>
+        <tr>
+          <th>Player Username</th>
+          <th>Score</th>
+          <th>No.of Moves</th>
+          <th>No.of Checks</th>
+          <th>No.of Dead</th>
+        </tr>
+        <tr>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+        </tr>
+      </table>
+  </div>
+</div>
+
+{%endblock%}
+{% block scripts %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" ></script>
+<script>
+  var board, game = new Chess();
+  let gameMode;
+  var positionCount;
+  window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    gameMode = urlParams.get('mode');
+    console.log("Game mode:", gameMode); 
+    /*if (gameMode === 'computer') {
+        makeAIMove();
+    }*/
+};
+
+  
+  /* Initialize the Chessboard */
+  board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      pieceTheme: 'static/pieces/{piece}.png',
+      onDragStart: onDragStart,
+      onDrop: onDrop,
+      onMouseoverSquare: highlightLegalMoves,
+      onMouseoutSquare: removeHighlights
+  });
+  
+  /* Function to handle a player's move */
+  function onDrop(source, target) {
+      // Clear the highlights before making the move
+      removeHighlights();
+  
+      var move = game.move({
+          from: source,
+          to: target,
+          promotion: 'q' // Always promote to a queen for simplicity
+      });
+  
+      // Illegal move
+      if (move === null) return 'snapback';
+      if (gameMode === 'computer') {
+      window.setTimeout(makeBestMove, 150);}
+  }
+  
+  /* AI Move */
+  function makeBestMove() {
+      positionCount = 0;
+      var depth = 3; // You can adjust the depth
+      var bestMove = minimaxRoot(depth, game, true);
+      game.move(bestMove);
+      board.position(game.fen());
+  
+      // Check if the game is over
+      if (game.game_over()) {
+          alert('Game over');
+      }
+  }
+  
+  /* Minimax Algorithm and other related functions remain unchanged... */
+  function minimaxRoot(depth, game, isMaximizingPlayer) {
+    var newGameMoves = game.moves();  // Get legal moves
+    var bestMove = -9999;
+    var bestMoveFound;
+
+    for (var i = 0; i < newGameMoves.length; i++) {
+        game.move(newGameMoves[i]);
+        var value = minimax(depth - 1, game, !isMaximizingPlayer);
+        game.undo();
+        if (value >= bestMove) {
+            bestMove = value;
+            bestMoveFound = newGameMoves[i];
+        }
+    }
+
+    return bestMoveFound;
+}
+
+
+var minimax = function(depth, game, alpha, beta, isMaximisingPlayer) {
+    positionCount++;
+    if (depth === 0) {
+        return -evaluateBoard(game.board());
+    }
+
+    var newGameMoves = game.moves();
+
+    if (isMaximisingPlayer) {
+        var bestMove = -9999;
+        for (var i = 0; i < newGameMoves.length; i++) {
+            game.move(newGameMoves[i]);
+            bestMove = Math.max(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer));
+            game.undo();
+            alpha = Math.max(alpha, bestMove);
+            if (beta <= alpha) {
+                return bestMove;
+            }
+        }
+        return bestMove;
+    } else {
+        var bestMove = 9999;
+        for (var i = 0; i < newGameMoves.length; i++) {
+            game.move(newGameMoves[i]);
+            bestMove = Math.min(bestMove, minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer));
+            game.undo();
+            beta = Math.min(beta, bestMove);
+            if (beta <= alpha) {
+                return bestMove;
+            }
+        }
+        return bestMove;
+    }
+};
+
+/* Board Evaluation */
+var evaluateBoard = function(board) {
+    var totalEvaluation = 0;
+    for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 8; j++) {
+            totalEvaluation += getPieceValue(board[i][j], i, j);
+        }
+    }
+    return totalEvaluation;
+};
+
+/* Piece Values */
+var getPieceValue = function(piece, x, y) {
+    if (piece === null) return 0;
+    var absoluteValue = getAbsoluteValue(piece, piece.color === 'w', x, y);
+    return piece.color === 'w' ? absoluteValue : -absoluteValue;
+};
+
+var getAbsoluteValue = function(piece, isWhite, x, y) {
+    if (piece.type === 'p') {
+        return 10 + (isWhite ? pawnEvalWhite[y][x] : pawnEvalBlack[y][x]);
+    } else if (piece.type === 'r') {
+        return 50 + (isWhite ? rookEvalWhite[y][x] : rookEvalBlack[y][x]);
+    } else if (piece.type === 'n') {
+        return 30 + knightEval[y][x];
+    } else if (piece.type === 'b') {
+        return 30 + (isWhite ? bishopEvalWhite[y][x] : bishopEvalBlack[y][x]);
+    } else if (piece.type === 'q') {
+        return 90 + evalQueen[y][x];
+    } else if (piece.type === 'k') {
+        return 900 + (isWhite ? kingEvalWhite[y][x] : kingEvalBlack[y][x]);
+    }
+    throw "Unknown piece type: " + piece.type;
+};
+
+/* Piece-Specific Evaluation Tables */
+var pawnEvalWhite = [ [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+[5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+[1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
+[0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5],
+[0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0],
+[0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5],
+[0.5,  1.0, 1.0,  -2.0, -2.0,  1.0,  1.0,  0.5],
+[0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0] ];
+var pawnEvalBlack = reverseArray(pawnEvalWhite);
+var knightEval = [ [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
+[-4.0, -2.0,  0.0,  0.0,  0.0,  0.0, -2.0, -4.0],
+[-3.0,  0.0,  1.0,  1.5,  1.5,  1.0,  0.0, -3.0],
+[-3.0,  0.5,  1.5,  2.0,  2.0,  1.5,  0.5, -3.0],
+[-3.0,  0.0,  1.5,  2.0,  2.0,  1.5,  0.0, -3.0],
+[-3.0,  0.5,  1.0,  1.5,  1.5,  1.0,  0.5, -3.0],
+[-4.0, -2.0,  0.0,  0.5,  0.5,  0.0, -2.0, -4.0],
+[-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0] ];
+var bishopEvalWhite = [ [ -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0],
+[ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+[ -1.0,  0.0,  0.5,  1.0,  1.0,  0.5,  0.0, -1.0],
+[ -1.0,  0.5,  0.5,  1.0,  1.0,  0.5,  0.5, -1.0],
+[ -1.0,  0.0,  1.0,  1.0,  1.0,  1.0,  0.0, -1.0],
+[ -1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0, -1.0],
+[ -1.0,  0.5,  0.0,  0.0,  0.0,  0.0,  0.5, -1.0],
+[ -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0] ];
+var bishopEvalBlack = reverseArray(bishopEvalWhite);
+var rookEvalWhite = [[  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+[  0.5,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.5],
+[ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+[ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+[ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+[ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+[ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+[  0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0]];
+var rookEvalBlack = reverseArray(rookEvalWhite);
+var evalQueen = [ [ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0],
+[ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+[ -1.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+[ -0.5,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+[  0.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+[ -1.0,  0.5,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+[ -1.0,  0.0,  0.5,  0.0,  0.0,  0.0,  0.0, -1.0],
+[ -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0] ];
+var kingEvalWhite = [ [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+[ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+[ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+[ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+[ -2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0],
+[ -1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
+[  2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0 ],
+[  2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0 ]
+];
+var kingEvalBlack = reverseArray(kingEvalWhite);
+
+/* Utility to Reverse Arrays */
+function reverseArray(array) {
+    return array.slice().reverse();
+}
+
+let selectedHint = null;
+
+function generateHints() {
+    const hints = [];
+    const legalMoves = game.moves();
+
+    legalMoves.forEach(move => {
+        game.move(move);
+        const score = minimax(3, game, -Infinity, Infinity, false); // Adjust depth as needed
+        game.undo();
+        hints.push({ move: move, score: score });
+    });
+
+    // Sort hints by score in descending order
+    hints.sort((a, b) => b.score - a.score);
+
+    // Get the top 3 hints
+    const topHints = hints.slice(0, 1);
+
+    // Display hints in the modal
+    const hintList = $('#hint-list');
+    hintList.empty();
+    topHints.forEach((hint, index) => {
+        hintList.append(`<li data-move="${hint.move}">Move: ${hint.move} (Score: ${hint.score})</li>`);
+    });
+
+    selectedHint = topHints[0].move; // Default to the first hint
+    $('#apply-hint').show(); // Show apply button
+    $('#hintModal').show(); // Show the modal
+}
+
+// Apply the selected hint move
+$('#apply-hint').click(function() {
+    if (selectedHint) {
+        game.move(selectedHint);
+        board.position(game.fen());
+        $('#hintModal').hide();
+        removeHighlights(); // Clean up any highlights
+    }
+});
+
+// Close the modal
+$('.close').click(function() {
+    $('#hintModal').hide();
+});
+
+// Highlight selected hint and set it as the move to apply
+$(document).on('click', '#hint-list li', function() {
+    $('#hint-list li').removeClass('selected');
+    $(this).addClass('selected');
+    selectedHint = $(this).data('move');
+});
+
+
+
+  /* Function to highlight possible moves */
+  function highlightLegalMoves(square) {
+      var moves = game.moves({
+          square: square,
+          verbose: true
+      });
+  
+      if (moves.length === 0) return;
+  
+      // Highlight each possible move
+      for (var i = 0; i < moves.length; i++) {
+          var moveSquare = moves[i].to;
+          highlightSquare(moveSquare);
+      }
+  }
+  
+  /* Function to highlight a specific square */
+  function highlightSquare(square) {
+      var squareEl = $('#board .square-' + square);
+  
+      squareEl.css('background', 'green');  // Set the highlight color
+  }
+  
+  /* Function to remove all highlights */
+  function removeHighlights() {
+      $('#board .square-55d63').css('background', '');  // Default color
+  }
+  
+  /* Function to handle piece dragging logic */
+  function onDragStart(source, piece, position, orientation) {
+      // Do not pick up pieces if the game is over
+      if (game.in_checkmate() === true || game.in_draw() === true) {
+          return false;
+      }
+  
+      // Only pick up pieces for the side to move
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+          return false;
+      }
+  }
+  function openwhitedetails() {
+    document.getElementById("whitedetails").classList.add('open');
+  }
+  function closewhitedetails() {
+    document.getElementById("whitedetails").classList.remove('open');
+}
+function openblackdetails() {
+  document.getElementById("blackdetails").classList.add('open');
+}
+function closeblackdetails() {
+  document.getElementById("blackdetails").classList.remove('open');
+}
+document.getElementById('whites').addEventListener('click', function () {
+  openwhitedetails();
+});
+document.getElementById('blacks').addEventListener('click', function () {
+  openblackdetails();
+});
+
+
+
+  </script>
+  
+{% endblock %}

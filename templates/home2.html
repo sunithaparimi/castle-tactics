@@ -1,0 +1,161 @@
+{% if 'user_name' in session %}
+    {% extends 'base2.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
+{% block title %} Start Page {% endblock %}
+{% block styles %}
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #2b2b2b; 
+    color: #f1f1f1;
+  }
+
+  .middle-upper-text {
+    position: absolute;
+    top: 25vh;  /* Adjusted to use vh */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .element {
+
+    margin-top: 5vh;  /* Replaced px with vh */
+    text-indent: 2vw;  /* Replaced px with vw */
+  }
+  .logo{
+    height:50px;
+  }
+  h2 {
+    font-size: 2.5vw;  /* Replaced px with vw */
+    margin-top: 150%;  /* Replaced px with vh */
+    color: #ffa500;
+  }
+
+  p {
+    font-size: 1.5vw;  /* Replaced px with vw */
+  } 
+
+  .image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+  }
+
+  .image-container img {
+    margin-top: 8vh;  /* Replaced px with vh */
+    width: 80%;  /* Set image width to 80% of container */
+    height: auto;
+    max-height: 40vh;  /* Replaced px with vh for responsiveness */
+    object-fit: contain;
+  }
+
+  .start-container {
+    text-align: center;
+    margin-top: 5vh;  /* Replaced px with vh */
+  }
+
+  .start-button {
+    background-color: #ffd700;
+    color: #000000; 
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    font-size: 1.3vw;  /* Replaced px with vw */
+    border: none;
+    padding: 2vh 3vw;  /* Replaced px with vh and vw */
+    border-radius: 0.5vw;  /* Replaced px with vw */
+    cursor: pointer;
+    margin-top: 3vh;  /* Replaced px with vh */
+  }
+
+  .start-button:hover {
+    background-color: #ffa500;
+  }
+
+  /* Media Query for Small Screens */
+  @media only screen and (max-width: 975px) {
+    .middle-upper-text {
+      top: 35vh; /* Adjusted to keep text lower on the screen */
+    }
+
+    h2 {
+      font-size: 4vw;  /* Replaced px with vw */
+    }
+
+    p, .start-button {
+      font-size: 2.3vw;  /* Replaced px with vw */
+    }
+
+    .element {
+      text-indent: 4vw;  /* Replaced px with vw */
+    }
+
+    .image-container img {
+      max-height: 30vh;  /* Replaced px with vh */
+      max-width: 100%;
+    }
+
+    .start-button {
+      padding: 2vh 4vw;  /* Replaced px with vh and vw */
+    }
+  }
+
+  @media only screen and (max-width: 550px) {
+    .middle-upper-text {
+      top: 38vh; /* Adjusted to keep text lower on the screen */
+    }
+    .image-container img {
+      max-height: 25vh; /* Further decrease logo size in vh */
+    }
+    p, .start-button {
+      font-size: 3.4vw;  /* Replaced px with vw */
+    }
+    .element {
+      font-size: 2.8vw;  /* Replaced px with vw */
+    }
+  }
+
+  @media only screen and (max-width: 384px) {
+    .image-container img {
+      max-height: 20vh; /* Decreased logo size in vh */
+    }
+  }
+
+</style>  
+{% endblock %}
+{% block content %}
+<div class="image-container">
+  <img src="static\logo-removebg-preview.png" class="logo" alt="Logo">
+</div>
+
+<div class="middle-upper-text">
+  <h2>Castle Tactics</h2>
+  <p>Welcome to Castle Tactics, where strategy meets skill!</p>
+  <div class="element">Join the game, sharpen your mind, and challenge opponents worldwide.</div>
+  <div class="start-container">
+    {% if 'user_name' in session %}
+      <button class="start-button" onclick="navigateTostart()">Start Game</button>
+    </div>
+    {% else %}
+      <button class="start-button" onclick="navigateToregister()">  Register</button>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  function navigateTostart() {
+      window.location.href = 'start'; 
+  }
+  function navigateToregister() {
+    window.location.href = 'register'; 
+}
+</script>
+{% endblock %}

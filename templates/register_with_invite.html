@@ -1,0 +1,433 @@
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    try:
+        data = request.json
+        print("Received data:", data)  # Log the data received
+
+        if not data:
+            return jsonify({"status": "error", "message": "No data received"}), 400
+
+        # Extract the required fields from the request data
+        user_name = data.get('whiteUserName')
+        black_user_name = data.get('blackUserName')
+        white_score = data.get('whiteScore')
+        black_score = data.get('blackScore')
+        game_id = data.get('gameId')
+        start_time = data.get('startTime')
+        end_time = data.get('endTime')
+        white_user_position = data.get('userPositionWhite')
+        black_user_position = data.get('userPositionBlack')
+        mode = data.get('gameMode')  # Get game mode
+
+        print(f"Received: User Name: {user_name}, Black User Name: {black_user_name}, "
+              f"White Score: {white_score}, Black Score: {black_score}, "
+              f"Game ID: {game_id}, Start Time: {start_time}, End Time: {end_time}, "
+              f"White Position: {white_user_position}, Black Position: {black_user_position}, gameMode : {mode}")
+
+        # Ensure that the required data is present (check for black user only if game mode is not 'computer')
+        if (user_name is None or 
+            white_score is None or 
+            game_id is None or 
+            start_time is None or 
+            end_time is None or 
+            white_user_position is None):
+            error_message = "Missing required data"
+            print(error_message)  # Log the error
+            return jsonify({"status": "error", "message": error_message}), 400
+
+        # If game mode is 'computer', ensure black user is skipped
+        if mode == 'computer' and black_user_name is not None:
+            black_user_name = None  # Set black_user_name to None to skip black player data
+
+        # Check if users exist in the referenced table (e.g., users table) before inserting data
+        cursor = mysql.connection.cursor()
+
+        # Check if white user exists
+        cursor.execute("SELECT COUNT(*) FROM USER_DETAILS WHERE user_name = %s", (user_name,))
+        if cursor.fetchone()[0] == 0:
+            return jsonify({"status": "error", "message": f"White user {user_name} not found"}), 400
+
+        # Check if black user exists (only if in two-player mode)
+        if black_user_name is not None:
+            cursor.execute("SELECT COUNT(*) FROM USER_DETAILS  WHERE user_name = %s", (black_user_name,))
+            if cursor.fetchone()[0] == 0:
+                return jsonify({"status": "error", "message": f"Black user {black_user_name} not found"}), 400
+
+        try:
+            # Insert into the GAME_DETAILS table (game start and end times)
+            cursor.execute("""
+                INSERT INTO GAME_DETAILS (game_id, end_time) 
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
+            """, (game_id, end_time))
+            mysql.connection.commit()
+
+            # Insert into the DETAILS_TRANSFER table for white player
+            cursor.execute("""
+                INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                VALUES (%s, %s, %s)
+            """, (user_name, game_id, start_time))
+            mysql.connection.commit()
+
+            # If in "two-player" mode, insert data for black player
+            if black_user_name is not None:
+                cursor.execute("""
+                    INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                    VALUES (%s, %s, %s)
+                """, (black_user_name, game_id, start_time))
+                mysql.connection.commit()
+
+                # Insert into GAME_PLAYERS table for both players
+            cursor.execute("""
+                 INSERT INTO GAME_PLAYERS (game_id, user_name, opponent_user_name)
+                VALUES (%s, %s, %s)
+                """, (game_id, user_name, black_user_name))
+            mysql.connection.commit()
+
+            # Insert into PREVIOUSLY_PLAYED table for white player (score and position)
+            cursor.execute("""
+                INSERT INTO PREVIOUSLY_PLAYED (user_name, game_id, score, user_position) 
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+            """, (user_name, game_id, white_score, white_user_position))
+            mysql.connection.commit()
+
+            # If black user exists, insert their data as well
+            if black_user_name is not None:
+                cursor.execute("""
+                    INSERT INTO PREVIOUSLY_PLAYED (user_name, game_id, score, user_position) 
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+                """, (black_user_name, game_id, black_score, black_user_position))
+                mysql.connection.commit()
+
+        except Exception as db_error:
+            # Rollback on database error
+            print(f"Database error: {str(db_error)}")
+            mysql.connection.rollback()
+            return jsonify({"status": "error", "message": f"Database error: {str(db_error)}"}), 500
+
+        finally:
+            cursor.close()
+
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print(f"Error during data submission: {str(e)}")  # Log the exception
+        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        @app.route('/submit_score', methods=['POST'])
+def submit_score():
+    try:
+        # Get data from the frontend (request JSON)
+        data = request.json
+        print("Received data:", data)  # Log the received data
+
+        if not data:
+            return jsonify({"status": "error", "message": "No data received"}), 400
+
+        # Extract variables from the received data
+        game_id = data.get('gameId')
+        player1 = data.get('whiteUserName') or data.get('player1')
+        player2 = data.get('blackUserName') or data.get('player2')
+        score1 = data.get('whiteScore')  # Directly get whiteScore
+        score2 = data.get('blackScore')  # Directly get blackScore
+        start_time = data.get('startTime')
+        end_time = data.get('endTime')
+        position1 = data.get('userPositionWhite') or data.get('position1')
+        position2 = data.get('userPositionBlack') or data.get('position2')
+        mode = data.get('gameMode')  # Optional: mode of the game ('computer' or 'two-player')
+
+        # Debugging: Print extracted variables
+        print(f"Extracted values: game_id={game_id}, player1={player1}, player2={player2}, "
+              f"score1={score1}, score2={score2}, start_time={start_time}, end_time={end_time}, "
+              f"position1={position1}, position2={position2}, mode={mode}")
+
+        # Validate the required data (adjusted to handle computer mode)
+        if not game_id or not player1 or score1 is None or start_time is None or end_time is None or position1 is None:
+            print("Missing required data")  # Log if any required data is missing
+            return jsonify({"status": "error", "message": "Missing required data"}), 400
+
+        # If game mode is "computer," set player2 to None and ignore score2/position2
+        if mode == 'computer':
+            print("Game mode is 'computer'. Setting player2, score2, and position2 to None.")
+            player2 = None
+            score2 = None
+            position2 = None
+        elif not player2 or score2 is None or position2 is None:
+            print("Missing required data for player2 in two-player mode")  # Log missing player2 data
+            return jsonify({"status": "error", "message": "Missing required data for player2"}), 400
+
+        # Start a database transaction
+        cursor = mysql.connection.cursor()
+        cursor.execute("START TRANSACTION;")
+        print("Transaction started.")
+
+        # 1. Insert game details into GAME_DETAILS table (with game start and end times)
+        cursor.execute("""
+            INSERT INTO GAME_DETAILS (game_id, end_time)
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
+        """, (game_id, end_time))
+        print(f"Game details inserted or updated for game_id={game_id} with end_time={end_time}")
+
+        # 2. Insert into DETAILS_TRANSFER for player 1
+        cursor.execute("""
+            INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+            VALUES (%s, %s, %s)
+        """, (player1, game_id, start_time))
+        print(f"Details transferred for player1={player1} in game_id={game_id} at start_time={start_time}")
+
+        # If in two-player mode, insert data for player 2 in DETAILS_TRANSFER
+        if player2:
+            cursor.execute("""
+                INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                VALUES (%s, %s, %s)
+            """, (player2, game_id, start_time))
+            print(f"Details transferred for player2={player2} in game_id={game_id} at start_time={start_time}")
+
+        # 3. Insert into PREVIOUSLY_PLAYED table with scores and positions
+        cursor.execute("""
+            INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+            VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+        """, (game_id, player1, score1, position1))
+        print(f"Inserted score and position for player1={player1} in game_id={game_id}")
+
+        if player2:
+            cursor.execute("""
+                INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+            """, (game_id, player2, score2, position2))
+            print(f"Inserted score and position for player2={player2} in game_id={game_id}")
+
+        # 4. Manually update user stats (bypassing the trigger)
+        # Update USER_STATS for player1
+        cursor.execute("""
+            UPDATE USER_STATS
+            SET no_of_games_played = no_of_games_played + 1,
+                no_of_won = CASE WHEN user_name = %s THEN no_of_won + 1 ELSE no_of_won END,
+                no_of_lost = CASE WHEN user_name = %s THEN no_of_lost + 1 ELSE no_of_lost END
+            WHERE user_name = %s;
+        """, (player1, player2, player1))
+        print(f"Updated USER_STATS for player1={player1}")
+
+        if player2:
+            cursor.execute("""
+                UPDATE USER_STATS
+                SET no_of_games_played = no_of_games_played + 1,
+                    no_of_won = CASE WHEN user_name = %s THEN no_of_won + 1 ELSE no_of_won END,
+                    no_of_lost = CASE WHEN user_name = %s THEN no_of_lost + 1 ELSE no_of_lost END
+                WHERE user_name = %s;
+            """, (player2, player1, player2))
+            print(f"Updated USER_STATS for player2={player2}")
+
+        # 5. Calculate and update win percentage for both players
+        cursor.execute("""
+            UPDATE USER_STATS
+            SET win_percentage = (no_of_won / no_of_games_played) * 100
+            WHERE user_name IN (%s, %s);
+        """, (player1, player2))
+        print(f"Updated win percentage for players {player1} and {player2}")
+
+        # 6. Commit the transaction (without relying on triggers)
+        mysql.connection.commit()
+        print("Transaction committed successfully.")    
+
+        # Close cursor
+        cursor.close()
+
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        # Rollback on error
+        mysql.connection.rollback()
+        print(f"Error during transaction: {str(e)}")  # Log the error message
+        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        @app.route('/submit_score', methods=['POST'])
+        def submit_score():
+            try:
+                # Get data from the frontend (request JSON)
+                data = request.json
+                print("Received data:", data)  # Log the received data
+        
+                if not data:
+                    return jsonify({"status": "error", "message": "No data received"}), 400
+        
+                # Extract variables from the received data
+                game_id = data.get('gameId')
+                player1 = data.get('whiteUserName') #or data.get('player1')
+                player2 = data.get('blackUserName') #or data.get('player2')
+                score1 = data.get('whiteScore')  # Directly get whiteScore
+                score2 = data.get('blackScore')  # Directly get blackScore
+                start_time = data.get('startTime')
+                end_time = data.get('endTime')
+                position1 = data.get('userPositionWhite') #or data.get('position1')
+                position2 = data.get('userPositionBlack') #or data.get('position2')
+                mode = data.get('gameMode')  # Optional: mode of the game ('computer' or 'two-player')
+        
+                # Debugging: Print extracted variables
+                print(f"Extracted values: game_id={game_id}, player1={player1}, player2={player2}, "
+                      f"score1={score1}, score2={score2}, start_time={start_time}, end_time={end_time}, "
+                      f"position1={position1}, position2={position2}, mode={mode}")
+        
+                # Validate the required data (adjusted to handle computer mode)
+                if not game_id or not player1 or score1 is None or start_time is None or end_time is None or position1 is None:
+                    print("Missing required data")  # Log if any required data is missing
+                    return jsonify({"status": "error", "message": "Missing required data"}), 400
+        
+                # If game mode is "computer," set player2 to None and ignore score2/position2
+                if mode == 'computer':
+                    print("Game mode is 'computer'. Setting player2, score2, and position2 to None.")
+                    player2 = None
+                    score2 = None
+                    position2 = None
+                elif not player2 or score2 is None or position2 is None:
+                    print(f"Missing required data for player2 in two-player mode. player2={player2}, score2={score2}, position2={position2}")  # Log missing player2 data
+                    return jsonify({"status": "error", "message": "Missing required data for player2"}), 400
+        
+                # If game mode is two-player, calculate position2 if missing based on the scores
+                if mode == 'two-player':
+                    if position2 is None:
+                        position2 = 1 if score2 > score1 else 0  # Player 2 wins if score2 > score1, else loses
+                        print(f"Calculated position2 for player2={player2}: {position2}")  # Log position2 calculation
+        
+                # Start a database transaction
+                cursor = mysql.connection.cursor()
+                cursor.execute("START TRANSACTION;")
+                print("Transaction started.")
+        
+                # 1. Insert game details into GAME_DETAILS table (with game start and end times)
+                cursor.execute("""
+                    INSERT INTO GAME_DETAILS (game_id, end_time)
+                    VALUES (%s, %s)
+                    ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
+                """, (game_id, end_time))
+                print(f"Game details inserted or updated for game_id={game_id} with end_time={end_time}")
+        
+                # 2. Insert into DETAILS_TRANSFER for player 1
+                cursor.execute("""
+                    INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                    VALUES (%s, %s, %s)
+                """, (player1, game_id, start_time))
+                print(f"Details transferred for player1={player1} in game_id={game_id} at start_time={start_time}")
+        
+                # If in two-player mode, insert data for player 2 in DETAILS_TRANSFER
+                if player2:
+                    cursor.execute("""
+                        INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                        VALUES (%s, %s, %s)
+                    """, (player2, game_id, start_time))
+                    print(f"Details transferred for player2={player2} in game_id={game_id} at start_time={start_time}")
+        
+                # 3. Insert into PREVIOUSLY_PLAYED table with scores and positions
+                cursor.execute("""
+                    INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+                """, (game_id, player1, score1, position1))
+                print(f"Inserted score and position for player1={player1} in game_id={game_id}")
+        
+                if player2:
+                    cursor.execute("""
+                        INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+                        VALUES (%s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE score = score + VALUES(score)
+                    """, (game_id, player2, score2, position2))
+                    print(f"Inserted score and position for player2={player2} in game_id={game_id}")
+        
+                # 4. Manually update user stats (bypassing the trigger)
+                # Update USER_STATS for player1
+                cursor.execute("""
+                    UPDATE USER_STATS
+                    SET no_of_games_played = no_of_games_played + 1,
+                        no_of_won = CASE WHEN user_name = %s THEN no_of_won + 1 ELSE no_of_won END,
+                        no_of_lost = CASE WHEN user_name = %s THEN no_of_lost + 1 ELSE no_of_lost END
+                    WHERE user_name = %s;
+                """, (player1, player2, player1))
+                print(f"Updated USER_STATS for player1={player1}")
+        
+                if player2:
+                    cursor.execute("""
+                        UPDATE USER_STATS
+                        SET no_of_games_played = no_of_games_played + 1,
+                            no_of_won = CASE WHEN user_name = %s THEN no_of_won + 1 ELSE no_of_won END,
+                            no_of_lost = CASE WHEN user_name = %s THEN no_of_lost + 1 ELSE no_of_lost END
+                        WHERE user_name = %s;
+                    """, (player2, player1, player2))
+                    print(f"Updated USER_STATS for player2={player2}")
+        
+                # 5. Calculate and update win percentage for both players
+                cursor.execute("""
+                    UPDATE USER_STATS
+                    SET win_percentage = (no_of_won / no_of_games_played) * 100
+                    WHERE user_name IN (%s, %s);
+                """, (player1, player2))
+                print(f"Updated win percentage for players {player1} and {player2}")
+        
+                # 6. Commit the transaction (without relying on triggers)
+                mysql.connection.commit()
+                print("Transaction committed successfully.")    
+        
+                # Close cursor
+                cursor.close()
+        
+                return jsonify({"status": "success"}), 200
+        
+            except Exception as e:
+                # Rollback on error
+                mysql.connection.rollback()
+                print(f"Error during transaction: {str(e)}")  # Log the error message
+                return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500

@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% block title %} Register Page {% endblock %}
+{% block styles %}
+<style>
+    body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #2b2b2b; 
+}
+
+.main *{ 
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.main {
+  position: absolute;
+  top: 74%; /* Adjust for center positioning */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50vw; /* Using viewport width for dynamic sizing */
+  max-width: 20rem; /* Maximum width for large screens */
+  padding: 3vw; /* Scaled padding */
+  border-radius: 2vw; /* Rounded corners with vw */
+  border: 0.2vw solid rgba(180, 180, 196);
+  background-color: #444444; 
+}
+
+.main h1 {
+  margin-top: 0.1%;
+  text-align: center;
+  font-size: 2vw; /* Reduced size */
+  margin-bottom: 7vh;
+  color: #ffa500;
+}
+.main .input-box {
+  width: 100%;
+  height: 6.5vh; /* Reduced size */
+  margin: 2.5vh 0; /* Reduced size */
+  position: relative;
+}
+
+.main .input-box input {
+  width: 100%;
+  height: 100%;
+  background-color: snow white;
+  border: none;
+  outline: none;
+  border: 0.2vw solid snow white;
+  border-radius: 1.8vw; /* Reduced size */
+  font-size: 1vw; /* Reduced size */
+  padding: 1.5vw 3vw 1vw 1.8vw; /* Reduced size */
+}
+
+.main .input-box input::placeholder {
+  font-size: 1vw; /* Reduced size */
+  background-color: snow white;
+}
+
+.main .input-box i {
+  position: absolute;
+  right: 1.8vw; /* Reduced size */
+  top: 2vh;
+  font-size: 1vw; /* Reduced size */
+}
+
+.main .button {
+  width: 100%;
+  height: 7vh; /* Reduced size */
+  border: none;
+  outline: none;
+  border-radius: 2vw; /* Reduced size */
+  font-size: 1.1vw; /* Reduced size */
+  font-weight: 800;
+  cursor: pointer;
+  background-color: #ffd700;
+  align-items: center;
+}
+
+.main .button:hover {
+  background-color:  #ffa500;
+}
+
+.main .button:active {
+  font-size: 1vw;
+  color: #0066ff;
+}
+
+.main .Login {
+  text-align: center; 
+  margin: 5vh 0;
+  font-size: 1vw;
+}
+
+.Login p a {
+  text-decoration: none;
+  color: rgb(0, 255, 1); 
+  font-weight: 600;
+}
+
+.Login p a:hover {
+  text-decoration: none;
+  font-size: 1.5vw;
+  color: rgb(77, 197, 231);
+}
+
+.Login p a:active {
+  text-decoration: none;
+  color: #0066ff;
+  font-size: 1vw;
+}
+
+section {
+  margin: 2vh;
+  padding: 2vh;
+  background-color: #ffffff;
+  border-radius: 1vw;
+  box-shadow: 0 1vh 2vw rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 430px) {
+  .main {
+      width: 90vw; /* Slightly larger width for smaller screens */
+      padding: 8vw; /* Adjusted padding for smaller screens */
+      max-width: 22rem; /* Maximum width to prevent it from becoming too large */
+  }
+  .main h1 {
+      font-size: 5vw; /* Larger text for small screens */
+  }
+  .input-box {
+      width: 100%; /* Ensure the input box takes up the full width */
+      height: 2vh; /* Keep the height of the input box reasonable */
+      margin: 3vh 0; /* Adjust margin for smaller screens */
+  }
+  .input-box input {
+      width: 100%; /* Full width for input box */
+      height: 100%; /* Maintain height proportion */
+      font-size: 3.5vw; /* Adjust font size for small screens */
+      padding: 2vw 4vw; /* Adjust padding to make the input box fit better */
+  }
+  .main .button {
+      font-size: 4vw; /* Adjust button text size */
+  }
+  .Login p {
+      font-size: 2.5vw; /* Adjust link text size */
+  }
+
+  /* Prevent overflow */
+  .main {
+      overflow: hidden;
+  }}
+@media (max-width: 599px) {
+  .main {
+      width: 85vw; /* Increased for smaller screens */
+      padding: 8vw;
+  }
+
+  .main h1 {
+      font-size: 4vw;
+  }
+
+  .input-box input {
+      font-size: 3vw;
+  }
+
+  .main .button {
+      font-size: 3vw;
+  }
+
+  .Login p {
+      font-size: 2.5vw;
+  }
+}
+
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .main {
+      width: 70vw; /* Slightly smaller width */
+      padding: 5vw;
+  }
+
+  .main h1 {
+      font-size: 3vw;
+  }
+
+  .input-box input {
+      font-size: 2vw;
+  }
+
+  .main .button {
+      font-size: 2vw;
+  }
+
+  .Login p {
+      font-size: 2vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main {
+      width: 50vw; /* Optimal width for larger screens */
+      padding: 3vw;
+  }
+
+  .main h1 {
+      font-size: 2vw;
+  }
+
+  .input-box input {
+      font-size: 1.5vw;
+  }
+
+  .main .button {
+      font-size: 1.5vw;
+  }
+
+  .Login p {
+      font-size: 1.5vw;
+  }
+}
+@media (min-width: 599px) {
+  .main {
+      width: 70vw; /* Slightly smaller width */
+      padding: 5vw;
+  }
+
+  .main h1 {
+      font-size: 3vw;
+  }
+
+  .input-box input {
+      font-size: 8vw;
+  }
+
+  .main .button {
+      font-size: 2vw;
+  }
+
+  .Login p {
+      font-size: 2vw;
+  }
+}
+
+</style>
+{% endblock %}
+{% block content %}
+<section class="main">
+    <form method="POST" action="/register">
+        <h1>Register</h1>
+        {{ form.hidden_tag() }}  <!-- CSRF protection -->
+        
+        <div class="input-box">
+            {{ form.user_name(class="input-field", placeholder="Username", required=True) }}
+            <i class="fa-solid fa-user"></i>
+            {% for error in form.user_name.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="input-box">
+            {{ form.email_ID(class="input-field", placeholder="Email ID", required=True) }}
+            <i class="fa-solid fa-envelope"></i>
+            {% for error in form.email_ID.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        
+        <div class="input-box">
+            {{ form.password(class="input-field", placeholder="Password", required=True) }}
+            <i class="fa-solid fa-lock"></i>
+            {% for error in form.password.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="input-box">
+            {{ form.confirm_password(class="input-field", placeholder="Confirm Password", required=True) }}
+            <i class="fa-solid fa-lock"></i>
+            {% for error in form.confirm_password.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="input-box">
+            {{ form.notification_status.label }}  <!-- This will show the label -->
+            {{ form.notification_status() }}  <!-- This will render the select field -->
+            {% for error in form.notification_status.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+            {{ form.submit(class="button") }}
+        <div class="Login">
+            <p>Already have an account? <a href="/login">Login</a></p>
+        </div>
+    </form>
+</section>
+    
+{%endblock%}
+
+
+

@@ -1,0 +1,401 @@
+{% extends 'base2.html' %}
+{% block title %} Learn Page {% endblock %}
+{% block styles %}
+<style>
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #2b2b2b;
+        color: black;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    h1, h2 {
+        color: #ffa500;
+    }
+
+    .piece-info {
+        display: flex;
+        align-items: center;
+        margin: 2vh 0;
+        padding: 2vh;
+        background-color: #2a2a2a;
+        border-radius: 1vw;
+        box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .piece-info:hover {
+        transform: scale(1.02);
+    }
+
+    .piece-info img {
+        width: 5vw;
+        height: 5vw;
+        margin-right: 2vw;
+        border-radius: 50%;
+        box-shadow: 0 0.5vh 1.5vh rgba(255, 255, 255, 0.5);
+    }
+
+    .piece-description {
+        font-size: 1rem;
+        color: #ddd;
+    }
+
+    section {
+        margin: 2vh auto;
+        width: 100%;
+        background-color: #2b2b2b;
+        border-radius: 1vw;
+        box-shadow: 0 1vh 2.5vh #444444;
+        transition: transform 0.3s ease-in-out;
+        color:#f1f1f1;
+    }
+
+    section:hover {
+        transform: scale(1.02);
+    }
+
+    ul {
+        list-style-type: disc;
+        padding-left: 2vw;
+        line-height: 1.8;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 3vh;
+        margin-bottom: 2vh;
+        border-bottom: 0.3vh solid #1A1A19;
+        padding-bottom: 0.5vh;
+    }
+
+    b {
+        color: #ffa500;
+    }
+
+    button {
+        background-color: #ff6f61;
+        color: #ffffff;
+        padding: 1vh 2vw;
+        border: none;
+        border-radius: 0.5vw;
+        cursor: pointer;
+        font-size: 1em;
+        margin-top: 2vh;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #d45d50;
+    }
+
+    .chessboard-container {
+        padding-top: 5vh;
+        width: 100%;
+        max-width: 80vw;
+        text-align: center;
+        margin: 2vh auto;
+        margin-bottom: 8vh;
+        justify-content: center;
+    }
+
+    .chessboard-image {
+        width: 80%;
+        height: auto;
+        border-radius: 1vw;
+        box-shadow: 0 1vh 1.5vh rgba(0, 0, 0, 0.5);
+        justify-content: center;
+    }
+
+    .section-heading {
+        text-align: center;
+        position: relative;
+        padding-top: 2vh;
+        margin-top: 5vh;
+        border-top: 0.2vh solid #ff6f61;
+        padding-top: 5vh;
+    }
+
+    .piece-section-heading {
+        margin-bottom: 2vh;
+        text-align: center;
+        font-size: 3vh;
+        color: #ffa500;
+        padding-top: 3vh;
+    }
+
+    .piece-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2vw;
+        max-width: 80vw;
+        margin: auto;
+        padding: 2vh;
+        box-sizing: border-box;
+    }
+
+    .piece-card {
+        background-color: #629584;
+        border-radius: 1vw;
+        text-align: center;
+        box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2vh;
+        height: 40vh;
+        justify-content: space-between;
+    }
+
+    .piece-image {
+        width: 8vw;
+        height: 15vh;
+        object-fit: contain;
+        margin-bottom: 1vh;
+    }
+
+    .piece-card h3 {
+        color: #ffffff;
+        font-size: 2vh;
+        margin: 2vh 0;
+    }
+
+    .piece-description {
+        font-size: 1em;
+        color: #ddd;
+        max-width: 90%;
+        margin-top: 1vh;
+        margin-bottom: auto;
+        text-align: center;
+    }
+
+    .section-shadow {
+        width: 100%;
+        box-shadow: 0 1vh 2.5vh rgba(0, 0, 0, 0.5);
+    }
+
+    p {
+    line-height: 1.8;
+    padding-left: 2vw;
+    }
+
+    #piece-movements {
+    margin: 2vh 0; /* Adds vertical margin to create spacing around the Pieces section */
+    }
+
+
+    /* Media Query for Responsiveness */
+    @media (max-width: 768px) {
+        .piece-container {
+            grid-template-columns: 1fr 1fr;
+            padding: 2vh;
+        }
+
+        .chessboard-image {
+            height: 40vh;
+        }
+
+     /* Make image containers stack below text */
+    .points-image-container,
+    .advanced-rules-image-container {
+        position: static; /* Remove absolute positioning */
+        width: 100%; /* Full width in mobile view */
+        height: auto;
+        margin-top: 2vh; /* Add spacing above images */
+    }
+
+    /* Scale images properly on small screens */
+    .points-image,
+    .advanced-rules-image {
+        width: 100%;
+        height: auto; /* Keep aspect ratio */
+    }
+
+    /* Adjust padding for smaller screens */
+    #points, #advanced-rules {
+        padding: 2vh;
+    }
+    }
+
+    @media (max-width: 480px) {
+        .piece-container {
+            grid-template-columns: 1fr;
+            padding: 1vh;
+        }
+
+        .chessboard-image {
+            height: 30vh;
+        }
+
+        .points-image-container,
+        .advanced-rules-image-container {
+        position: relative; /* Remove absolute positioning */
+        width: 80%; /* Make image take up full width in mobile view */
+        height: auto;
+        margin-left: 2vh; /* Add spacing above images to separate them from text */
+        }
+
+        .points-image,
+        .advanced-rules-image {
+        width: 100%; /* Full width for responsive scaling */
+        height: auto; /* Maintain aspect ratio */
+        padding: 3vh;
+    }
+    }
+
+    #points {
+        position: relative;
+        padding: 3vh;
+        box-sizing: border-box;
+    }
+
+    .points-image-container {
+        position: absolute;
+        right: 5vw;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30vw;
+        height: 30vw;
+    }
+
+    .points-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 1vw;
+    }
+
+    #advanced-rules {
+        position: relative;
+        padding: 3vh;
+        box-sizing: border-box;
+    }
+
+    .advanced-rules-image-container {
+        position: absolute;
+        right: 5vw;
+        top: 50%;
+        transform: translateY(-38%);
+        width: 20vw;
+        height: 20vw;
+    }
+
+    .advanced-rules-image {
+        width: 90%;
+        height: 90%;
+        object-fit: cover;
+        border-radius: 1vw;
+    }
+</style>
+ 
+{% endblock %}
+{% block content %}
+<section id="game-rules">
+
+    <div class="chessboard-container">
+        <img src="static\3 Reasons You'll Love Chess.jpg" alt="Chessboard" class="chessboard-image">
+    </div>
+            <p><b>Objective : </b>The primary goal of chess is to checkmate the opponent's king, meaning the king is under attack and cannot escape capture.<p>
+
+            <p><b>The Board: </b>Chess is played on an 8x8 grid with alternating light and dark squares. Each player begins with 16 pieces: 1 king, 1 queen, 2 rooks, 2 bishops, 2 knights, and 8 pawns.</p>
+
+            <section id="piece-movements">
+                <h2 class="piece-section-heading">Pieces</h2>
+                <div class="piece-container">
+                    <div class="piece-card">
+                        <img src="static\pieces\gold-king-bg.png" alt="King" class="piece-image">
+                        <h3>The King</h3>
+                        <p class="piece-description"> King is the most important piece. It moves one square in any direction (horizontal, vertical, or diagonal).</p>
+                    </div>
+            
+                    <div class="piece-card">
+                        <img src="static\pieces\queen-new.png" alt="Queen" class="piece-image">
+                        <h3>The Queen</h3>
+                        <p class="piece-description">The queen is the most powerful piece, capable of moving in any direction over any number of squares vertically, horizontally, or diagonally.</p>
+                    </div>
+            
+                    <div class="piece-card">
+                        <img src="static\pieces\bishop-new.png" alt="Bishop" class="piece-image">
+                        <h3>The Bishop</h3>
+                        <p class="piece-description">A bishop moves diagonally and starts between the king's knight and the king or between the queen's knight and the queen.</p>
+                    </div>
+            
+                    <div class="piece-card">
+                        <img src="static\pieces\knight-new.png" alt="Knight" class="piece-image">
+                        <h3>The Knight</h3>
+                        <p class="piece-description">The knight moves in an "L" shape and is the only piece that can jump over others.</p>
+                    </div>
+            
+                    <div class="piece-card">
+                        <img src="static\pieces\rook-new.png" alt="Rook" class="piece-image">
+                        <h3>The Rook</h3>
+                        <p class="piece-description">The rook moves any number of squares horizontally or vertically.</p>
+                    </div>
+            
+                    <div class="piece-card">
+                        <img src="static\pieces\pawn-new.png" alt="Pawn" class="piece-image">
+                        <h3>The Pawn</h3>
+                        <p class="piece-description">Pawns move forward one square but capture diagonally. They can move two squares on their first move.</p>
+                    </div>
+                </div>
+            </section>
+
+</section>
+
+<section id="points" class="section-shadow">
+    <h2>Game Insights</h2>
+    <p>Points distribution based on eliminating opponent pieces:</p>
+    <ul>
+        <li>Soldier: 1  point</li>
+        <li>Bishop: 3 points</li>
+        <li>Knight: 3 points</li>
+        <li>Rook: 5 points</li>
+        <li>Queen: 8 points</li>
+    </ul>
+
+    <p>Extra points given based on game results:</p>
+    <ul>
+        <li>Win: gain 9 points</li>
+        <li>Draw: 0 points</li>
+        <li>Loss: lose 9 points</li>
+    </ul>
+
+    <div class="points-image-container">
+        <img src="static\pieces\checkmate.png" alt="Points Image" class="points-image">
+    </div>
+
+    <p><b>Check and Checkmate:</b></p>
+    <ul>
+        <li>Check: The king is under direct attack by an opponent's piece.</li>
+        <li>Checkmate: The king is in check and there is no legal move to escape.</li>
+    </ul>
+
+    <p><b>Draws:</b></p>
+    <ul>
+        <li>Stalemate: If a player has no legal moves and their king is not in check, the game is a draw.</li>
+        <li>Insufficient Material: If neither player has enough pieces to checkmate (e.g., only kings left), the game is a draw.</li>
+        <li>Insufficient Material: If neither player has enough pieces to checkmate (e.g., only kings left), the game is a draw.</li>
+        <li>Insufficient Material: If neither player has enough pieces to checkmate (e.g., only kings left), the game is a draw.</li>
+    </ul>
+
+</section>
+
+<section id="advanced-rules" class="section-shadow">
+    <h2>Advanced Rules</h2>
+    <p>Here are a few additional rules to be aware of:</p>
+    <ul>
+        <li>En passant: Special pawn capture rule.A pawn that moves two squares from its starting position can be<br> captured "in passing" by an opponent's pawn if it could have been captured had it moved one square.<br>This must be done immediately on the opponent’s next move.</li>
+        <li>Castling: A special move involving the king and a rook.The king moves two squares towards a rook, and<br> the rook moves to the square adjacent to the king.<br> ( Conditions: neither the king nor the rook involved has moved before, there are no pieces between them,<br> the king is not in check, and the squares the king passes over are not attacked. )</li>
+        <li>Pawn Promotion: When a pawn reaches the opposite side of the board, it can be promoted to any piece<br> (except a king), typically a queen.</li>
+    </ul>
+
+    <div class="advanced-rules-image-container">
+        <img src="static\pieces\en-passant.jpg" alt="Advanced Rules Image" class="advanced-rules-image">
+    </div>
+</section>
+
+
+{%endblock%}

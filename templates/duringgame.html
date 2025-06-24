@@ -1,0 +1,741 @@
+{% extends 'base2.html' %}
+{% block title %} During game Page {% endblock %}
+{% block styles %}
+
+  <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <style>
+
+  body {
+    background-color: #2b2b2b; /* Dark background to highlight the chessboard */
+    color: #ffffff; /* Default text color */
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.coins,.time, .hints {
+    padding-left: 1%;
+    margin-left: 1%;
+    padding-right: 1%;
+    margin-right: 1%;
+    margin-top: 1%;
+    border: solid #ffa500; /* Gold border for a chess-like elegance */
+    border-radius: 2vw; /* Changed px to vw for relative sizing */
+    width: 8vw;
+    height: 4vh; /* Changed px to vh for height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #4b4b4b; /* Dark gray for a cohesive look */
+    color: #fff; /* White text for contrast */
+}
+
+.ID ,.endgame{
+  border: solid #ffa500; /* Gold border for a chess-like elegance */
+  background-color: #4b4b4b; /* Dark gray for a cohesive look */
+  color: #fff; /* White text for contrast */
+  padding-left: 1%;
+  margin-left: 1%;
+  padding-right: 1%;
+  margin-right: 1%;
+  margin-top: 1%;
+  border-radius: 2vw; /* Adjusted to use vw for proportionate scaling */
+  width: 8vw;
+  height: 4vh; /* Changed from px to vh for height scaling */
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.endgame
+{
+  width: 10vw; 
+  height: 4.7vh;
+  text-align: center;
+}
+.time,.ID,.endgame {
+    float: left;
+}
+
+.coins, .hints {
+    float: right;
+}
+
+.container::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.details {
+    padding: 2vh 1%;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 1vw;
+
+}
+
+
+.player-game-details, .opponent-game-details {
+  font-size: 2vh; /* Responsive font size */
+  font-family: Arial, Helvetica, sans-serif;
+  border: solid #ffa500;
+  border-radius: 1vw;
+  padding: 2vh;
+  background-color: #333333; /* Dark background for visibility */
+  color: #fff;
+  width: 15vw; /* Adjust width to suit design */
+  margin-right:8vh;
+}
+
+.detail-box {
+  width: 90%; /* Ensure smaller boxes fit well */
+  padding: 1.5vh;
+  margin-bottom: 1.5vh;
+  border: solid #ffa500;
+  border-radius: 1vw;
+  background-color: #555555; /* Gray background */
+  color: #ffffff;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin: auto;
+}
+
+.whites {
+  padding-top: 5vh;
+  padding-right: 2vw; /* Adjusted from 10px to vw for responsiveness */
+  float:right;
+}
+
+.blacks {
+  padding-top: 80vh; /* Converted 360px to vh for height scaling */
+  float:left;
+}
+
+.table {
+    padding-top: 5vh; /* Changed px to vh for padding */
+    text-align: center;
+}
+
+table {
+    width: 90%;
+    border-collapse: collapse;
+    min-width: 40vw; /* Changed px to vw for min-width */
+    margin: auto;
+    background-color: #282828; /* Dark table background */
+    color: #ffffff;
+}
+
+th {
+      font-size: 1.25vw; /* Converted 20px to vw for font size scaling */
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      padding: 2vh; /* Converted 10px to vh for better height scaling */
+      font-weight: 150;
+      background-color: #666666;
+      border: 1px solid #404040;
+}
+
+td {
+    font-size: 2vh; /* Changed px to vh for font size */
+    padding: 2vh;
+    text-align: center;
+    background-color: #3d3d3d;
+    border: 1px solid #404040;
+}
+
+
+@media screen and (max-width: 940px) { /* Changed px to vw for better responsiveness */
+  #board {
+  margin-top: 15vh; /* Ensure chessboard is positioned correctly */
+  width: 50vw;
+  
+}
+  .coins, .time, .hints {
+        width: 15vw;
+        height: 3vh; /* Changed px to vh for height */
+        margin-top: 2vh; /* Changed px to vh for margin-top */
+    }
+    .details {
+        display: none !important;
+    }
+    .whitedetails, .blackdetails {
+        display: block ;
+    }
+  
+}
+
+@media screen and (min-width: 940px) { /* Changed px to vw for better responsiveness */
+    .medium-screen-details {
+        display: none;
+    }
+    .whitedetails-content,
+    .blackdetails-content {
+        display: none !important;
+    }
+    
+}
+
+.whitedetails, .blackdetails {
+    display: none;
+}
+
+.whitedetails.open, .blackdetails.open {
+    display: block;
+}
+
+.whitedetails-content {
+    position: absolute;
+    top: 10vh; /* Changed px to vh for top spacing */
+    height: 15vh; /* Changed px to vh for height */
+    width: 90%;
+    background-color: snow white; /* Light yellow for contrast */
+    box-shadow: -0.5vw 0 1vh rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5vh; /* Changed px to vh for padding */
+    margin:2vh;
+}
+
+.blackdetails-content {
+    position: absolute;
+    bottom: 2vh; /* Changed px to vh for bottom spacing */
+    height: 15vh; /* Changed px to vh for height */
+    width: 90%;
+    background-color: snow white;
+    box-shadow: -0.5vw 0 2vh rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 5vh; /* Changed px to vh for padding */
+    left: 0; /* Position the box on the left side */
+}
+
+.close-whitedetails {
+    
+    color:#ffa500;
+}
+.close-blackdetails {
+    padding-left: 90%;
+    color:#ffa500;
+}
+
+#board {
+    padding-left: 4%;
+    padding-right: 0%; /* Remains the same as it's in percentage */
+    padding-top:4vh;
+}
+
+.white-1e1d7 {
+    background-color: #ffffff;
+}
+
+.black-3c85d {
+    background-color: #ffd700; /* Chessboard dark squares */
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 50%;
+  top: 15%; /* Change top to 50% */
+  width: 40vw; /* Use viewport width for responsiveness */
+  border: 2px solid #ffa500;
+  background-color: white;
+  padding: 2vh 4vw; /* Use viewport units for padding */
+  color:black;
+  transform: translate(-50%, -50%); /* Center horizontally and vertically */
+}
+
+.purpop.open{
+      display: block;
+      position: fixed;
+      z-index: 99999;
+      left: 50%;
+      top: 15%;
+      width: 40%;
+      color:black;
+      border: 2px solid #333;
+      background-color: white;
+      padding: 20px;
+      transform: translate(-50%, -50%);
+  }
+
+.modal-content {
+    margin-bottom: 2vh; /* Changed px to vh for margin */
+    
+}
+
+.close {
+    color: #ffa500;
+    float: right;
+    font-size: 5vh; /* Changed px to vh for font size */
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #ffd700;
+    text-decoration: none;
+      cursor: pointer;
+
+}
+
+.apply-hint {
+    padding: 2vh 4vw; /* Changed px to vh and vw for padding */
+    background-color: #ffa500;
+    border: none;
+    cursor: pointer;
+    color:black;
+    transition: background-color 0.3s;
+   
+}
+
+.apply-hint:hover {
+    background-color: #ffd700;
+}
+
+.apply-hint button {
+  margin: 0 1vw; /* Converted 10px to 1vw for horizontal spacing */
+}
+
+.popup.open {
+position: fixed;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+background-color: white;
+padding: 2vh; /* Converted 20px to vh for responsive vertical spacing */
+border: 0.2vw solid #333; /* Converted 2px to vw for border thickness */
+z-index: 999;
+width: 90%;
+color:black;
+max-width: 40vw; /* Converted 400px to vw for responsive scaling */
+box-sizing: border-box; /* Ensures padding doesn’t affect width */
+text-align: center; /* Centers text inside the popup */
+}
+
+/* General popup styles */
+.popup, .purpop {
+display: none;  /* Hide popup by default */
+}
+
+.purpop.open {
+z-index: 9999;  /* Ensure it's above other elements */
+display: block;
+}
+
+.popup.open {
+display: block;
+}
+
+.popup p {
+margin-bottom: 2vh; /* Converted 20px to 2vh for responsive spacing */
+}
+
+.popup button {
+padding: 1vh 2vw; /* Converted 10px and 20px to vh and vw for vertical and horizontal padding */
+background-color: #ffa500;
+border: none;
+cursor: pointer;
+transition: background-color 0.3s;
+margin: 0.5vh 0; /* Converted 5px to 0.5vh for vertical spacing */
+}
+
+
+/* Styling for the buttons container */
+.popup-buttons {
+display: flex;
+flex-direction: column;
+align-items: center;  /* Center buttons horizontally */
+justify-content: space-between;
+}
+
+.coin-image-container {
+margin-bottom: 2vh; /* Converted 20px to 2vh for vertical spacing */
+}
+
+.coin_image {
+width: 10vw; /* Converted 150px to 10vw for responsive width */
+height: auto;
+}
+.display
+{
+  display: flex;
+  justify-content: space-between; /* Positions the two boxes on opposite sides */
+  align-items: flex-end; /* Align items at the bottom */
+  position: fixed; /* Keep the boxes at the bottom of the page */
+  bottom: 0; /* Place at the bottom edge of the page */
+  width: 100%; /* Full width to span the page */
+  padding: 1vh 2vw; /* Padding for spacing */
+  background-color: #2b2b2b; /* Optional background color for visual focus */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+
+}
+ 
+   
+</style>
+
+{% endblock %}
+{% block content %}
+
+
+
+<div class="container"> 
+  <div class="coins" id="coins" title="Number of available coins">
+    <h2><span id="coinsText">{{coins}}</span></h2>
+    <span><svg width="20" height="20" viewBox="0 0 0 0" style="color:#E4AB00" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+      <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+    </svg>
+    <svg width="26px" height="26px" viewBox="0 0 256 256" fill="#E4AB00" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#E4AB00">
+        <path fill="currentColor" d="M184 89.57V84c0-25.08-37.83-44-88-44S8 58.92 8 84v40c0 20.89 26.25 37.49 64 42.46V172c0 25.08 37.83 44 88 44s88-18.92 88-44v-40c0-20.7-25.42-37.32-64-42.43Zm-128 57.3C36.41 141.4 24 132.39 24 124v-14.07c8.16 5.78 19.09 10.44 32 13.57Zm80-23.37c12.91-3.13 23.84-7.79 32-13.57V124c0 8.39-12.41 17.4-32 22.87Zm-16 71.37c-19.59-5.47-32-14.48-32-22.87v-4.17c2.63.1 5.29.17 8 .17c3.88 0 7.67-.13 11.39-.35a121.92 121.92 0 0 0 12.61 3.76Zm0-44.62A163 163 0 0 1 96 152a163 163 0 0 1-24-1.75v-23.79A183.74 183.74 0 0 0 96 128a183.74 183.74 0 0 0 24-1.54Zm64 48a165.45 165.45 0 0 1-48 0V174.4a179.48 179.48 0 0 0 24 1.6a183.74 183.74 0 0 0 24-1.54ZM232 172c0 8.39-12.41 17.4-32 22.87V171.5c12.91-3.13 23.84-7.79 32-13.57Z"/>
+      </g>
+    </svg>
+  </span>
+  </div>
+  
+  <div class="time" title="Game Timer">
+    <h2 id="timerDisplay">00:00</h2>
+    <span><svg width="0" height="0" viewBox="0 0 0 0" style="color:#1C2033" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+      <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+    </svg>
+    <svg width="26px" height="26px" viewBox="0 0 24 24" fill="#1C2033" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#1C2033">
+        <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+          <path d="M12 5.75a7.25 7.25 0 1 0 0 14.5a7.25 7.25 0 0 0 0-14.5ZM3.25 13a8.75 8.75 0 1 1 17.5 0a8.75 8.75 0 0 1-17.5 0Z"/>
+          <path d="M12 7.25a.75.75 0 0 1 .75.75v4.584l2.648 1.655a.75.75 0 1 1-.796 1.272l-3-1.875A.75.75 0 0 1 11.25 13V8a.75.75 0 0 1 .75-.75ZM6.53 3.47a.75.75 0 0 1 0 1.06l-2.5 2.5a.75.75 0 0 1-1.06-1.06l2.5-2.5a.75.75 0 0 1 1.06 0Zm10.94 0a.75.75 0 0 0 0 1.06l2.5 2.5a.75.75 0 1 0 1.06-1.06l-2.5-2.5a.75.75 0 0 0-1.06 0Z"/>
+        </g>
+      </g>
+    </svg></span>
+  </div>
+  <div class="ID">
+    <h2 class="game-id">ID: <span id="gameIdDisplay"></span></h2>
+</div>
+<button id="endGameButton" class="endgame"><h2>End Game</h2></button>
+
+  <div class="hints" title="Hints" id="hints"> 
+    <h2>Hints</h2>
+    <span><svg width="10" height="10" viewBox="0 0 0 0" style="color:#1C2033" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+      <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+    </svg>
+    <svg width="26px" height="26px" viewBox="0 0 24 24" fill="#1C2033" x="243" y="243" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#1C2033">
+        <path fill="currentColor" d="M13 22h-3v-3h3v3Zm0-5h-3v-.007c0-1.65 0-3.075.672-4.073a6.304 6.304 0 0 1 1.913-1.62c.334-.214.649-.417.914-.628a3.712 3.712 0 0 0 1.332-3.824A3.033 3.033 0 0 0 9 8H6a6 6 0 0 1 6-6a6.04 6.04 0 0 1 5.434 3.366a6.017 6.017 0 0 1-.934 6.3c-.453.502-.96.95-1.514 1.337a7.248 7.248 0 0 0-1.316 1.167A4.23 4.23 0 0 0 13 17Z"/>
+      </g>
+    </svg>
+  </span>
+</div>
+</div>
+
+<!-- Modal for Hint Suggestions -->
+<div id="hintModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <!-- Close Button -->
+    <span class="close">&times;</span>
+
+    <!-- Title -->
+    <h2>Suggested Moves</h2>
+    <!-- List of Hints -->
+    <ul id="hint-list"></ul>
+
+    <!-- Apply Hint Button -->
+    <button id="apply-hint" class="apply-hint" style="display:none;">Apply Hint</button>
+  </div>
+</div>
+
+<div id="purpop" class="purpop" style="display:none;">
+  <div class="modal-content">
+    <!-- Close Button -->
+    <span id="close-purpop" class="close" style="cursor: pointer; font-size: 20px; position: absolute; top: 20px; right: 10px;">&times;</span>
+    
+    <!-- Message for generating hints -->
+    <div id="generating-hints-message">
+      <p>Generating hints, please wait...</p>
+    </div>
+    
+    <!-- Error message will be displayed here -->
+    <div id="purchase-error-message" style="color:red; display:none;">
+      <p></p>
+    </div>
+  </div>
+</div>
+<div class="display">
+  <div class="details">
+      <div class="opponent-game-details">
+        <p>White's Username:</p>
+        <!-- Dynamically populated white username -->
+        <div class="detail-box" id="white-username">Loading...</div>
+        
+        <p>Score:</p>
+        <div class="detail-box" id="white-score">
+          <div id="whiteScore"><p></p></div>
+        </div>
+        
+        <p>No. of Moves:</p>
+        <div class="detail-box" id="white-moves">
+          <div id="whiteMoves"><p></p></div>
+        </div>
+        
+        <p>No. of Checks:</p>
+        <div class="detail-box" id="white-checks">
+          <div id="whiteChecks"><p></p></div>
+        </div>
+        
+        <p>No. of Dead:</p>
+        <div class="detail-box" id="white-dead">
+          <div id="whiteDeadPieces"><p></p></div>
+        </div>
+      </div>
+    </div>
+    <div class="medium-screen-details">
+      <div class="whites" id="whites">
+          <svg width="0" height="0" viewBox="0 0 0 0" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 20 20" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">
+          <path fill="currentColor" d="M10 3a1 1 0 0 1 1-1h.5c.385 0 .737.145 1.002.384A1.494 1.494 0 0 1 13.505 2h.99c.385 0 .737.145 1.003.384A1.494 1.494 0 0 1 16.5 2h.5a1 1 0 0 1 1 1v2.5a2.5 2.5 0 0 1-1.95 2.44c.284 4.043 1.7 6.585 2.187 7.35c.16.252.263.553.263.877v.333A1.5 1.5 0 0 1 17 18h-5.476a2.44 2.44 0 0 0 .435-1H17a.5.5 0 0 0 .5-.5v-.333a.637.637 0 0 0-.107-.34c-.573-.9-2.155-3.774-2.369-8.304A.5.5 0 0 1 15.518 7A1.5 1.5 0 0 0 17 5.5V3h-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 1-1 .003V4.5l-.005-1.002a.5.5 0 0 0-.5-.498h-.99a.5.5 0 0 0-.5.498L13 4.502a.5.5 0 0 1-1-.003v-1a.5.5 0 0 0-.5-.5H11v2.5A1.5 1.5 0 0 0 12.482 7a.5.5 0 0 1 .494.523c-.158 3.34-1.06 5.779-1.752 7.191a2.817 2.817 0 0 0-.203-.188a4.192 4.192 0 0 1-.55-.558c.588-1.278 1.288-3.315 1.479-6.029A2.505 2.505 0 0 
+          1 10 5.5V3ZM4.5 8a2 2 0 1 1 3.6 1.2a.5.5 0 0 0 .4.8H9a.5.5 0 0 1 0 1H7.893a.5.5 0 0 0-.496.56c.302 2.47 1.609 3.888 2.34 4.5c.175.146.263.33.263.489a.451.451 0 0 1-.451.451H3.45a.451.451 0 0 1-.45-.451c0-.16.088-.343.262-.489c.732-.612 2.04-2.03 2.341-4.5a.5.5 0 0 0-.496-.56H4a.5.5 0 0 1 0-1h.5a.5.5 0 0 0 .4-.8A1.989 1.989 0 0 1 4.5 8Zm2-3a3 3 0 0 0-2.817 4.034A1.5 1.5 0 0 0 4 12h.52c-.372 1.798-1.353 2.836-1.9 3.293c-.346.29-.62.736-.62 1.256C2 17.35 2.65 18 3.451 18H9.55c.8 0 1.45-.65 1.45-1.451c0-.52-.274-.966-.62-1.256c-.547-.457-1.528-1.495-1.9-3.293H9a1.5 1.5 0 0 0 .317-2.966A3 3 0 0 0 6.5 5Z"/></g></svg>
+        </div>
+       
+    <div id="whitedetails" class="whitedetails">
+      <div class="whitedetails-content">
+        <div class="close-whitedetails">
+          <svg width="0" height="0" viewBox="0 0 0 0" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+            <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+          </svg>
+          <svg width="0" height="0" viewBox="0 0 24 24" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" onclick="closewhitedetails()">
+              <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/>
+            </g>
+          </svg>
+        </div>
+        <table>
+          <tr>
+            <th>Player Username</th>
+            <th>Score</th>
+            <th>No. of Moves</th>
+            <th>No. of Checks</th>
+            <th>No. of Dead</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td><div id="whiteScore"><p></p></div></td>
+            <td><div id="whiteMoves"><p></p></div></td>
+            <td><div id="whiteChecks"><p></p></div></td>
+            <td><div id="whiteDeadPieces"><p></p></div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    </div>
+    
+    <div id="board" style="width: 35vw; height: 70vh;"></div>
+    <div id="gameStatus"></div>
+    
+    <div id="move-history" style="margin-top: 4vh;"></div>
+    <div class="medium-screen-details">
+    <div class="blacks" id="blacks">
+      <svg width="0" height="0" viewBox="0 0 0 0" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+        <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+      </svg>
+      <svg width="40px" height="40px" viewBox="0 0 20 20" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+        <g fill="currentColor">
+          <path fill="currentColor" d="M10.5 2a.5.5 0 0 0-.5.5v2.6c0 1.377.927 2.536 2.19 2.89c-.22 2.74-1.012 4.785-1.661 6.046c.184.216.357.377.492.49c.519.434.979 1.141.979 2.023A2.44 2.44 0 0 1 11.524 18H17a1.5 1.5 0 0 0 1.5-1.5v-.307c0-.348-.119-.669-.302-.932c-.54-.777-2.069-3.29-2.389-7.272A3.001 3.001 0 0 0 18 5.1V2.5a.5.5 0 0 0-.5-.5h-.75a.75.75 0 0 0-.75.75v.75a.5.5 0 0 1-1 .002V3.5l-.004-.754a.75.75 0 0 0-.75-.746h-.492a.75.75 0 0 0-.75.746L13 3.502a.5.5 0 0 1-1-.002v-.75a.75.75 0 0 0-.75-.75h-.75Zm-4 3a3 3 0 0 0-2.236 5H4a1 1 0 1 0 0 2h.52c-.372 1.798-1.353 2.836-1.9 3.293c-.346.29-.62.736-.62 1.256C2 17.35 2.65 18 3.451 18H9.55c.8 0 1.45-.65 1.45-1.451c0-.52-.274-.966-.62-1.256c-.547-.457-1.528-1.495-1.9-3.293H9a1 1 0 1 0 0-2h-.264A3 3 0 0 0 6.5 5Z"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+    <div class="details">
+      <div class="player-game-details">
+        <p>Black's Username:</p>
+        <!-- Dynamically populated black username -->
+        <div class="detail-box" id="black-username">Loading...</div>
+        
+        <p>Score:</p>
+        <div class="detail-box" id="black-score">
+          <div id="blackScore"><p></p></div>
+        </div>
+        
+        <p>No. of Moves:</p>
+        <div class="detail-box" id="black-moves">
+          <div id="blackMoves"><p></p></div>
+        </div>
+        
+        <p>No. of Checks:</p>
+        <div class="detail-box" id="black-checks">
+          <div id="blackChecks"><p></p></div>
+        </div>
+        
+        <p>No. of Dead:</p>
+        <div class="detail-box" id="black-dead">
+          <div id="blackDeadPieces"><p></p></div>
+        </div>
+      </div>
+    </div>
+    <div class="medium-screen-details">
+    <div id="blackdetails" class="blackdetails">
+      <div class="blackdetails-content">
+        <div class="close-blackdetails">
+          <svg width="0" height="0" viewBox="0 0 0 0" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full">
+            <rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect>
+          </svg>
+          <svg width="0" height="0" viewBox="0 0 0 0" fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor" onclick="closeblackdetails()">
+              <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/>
+            </g>
+          </svg>
+        </div>
+        <table>
+          <tr>
+            <th>Player Username</th>
+            <th>Score</th>
+            <th>No. of Moves</th>
+            <th>No. of Checks</th>
+            <th>No. of Dead</th>
+          </tr>
+          <tr>
+            <td></td>
+            <td><div id="blackScore"><p></p></div></td>
+            <td><div id="blackMoves"><p></p></div></td>
+            <td><div id="blackChecks"><p></p></div></td>
+            <td><div id="blackDeadPieces"><p></p></div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    </div>
+  </div>
+  
+
+
+
+
+
+
+<div id="HintsPopup" class="popup">
+  <p>Purchase Hints?</p>
+  <div class="popup-buttons">
+    <!-- Image on a separate line -->
+    <div class="coin-image-container">
+      <img src="https://i.etsystatic.com/27152142/r/il/3ad280/2983932674/il_1588xN.2983932674_fdvz.jpg" class="coin_image">
+      <p>Each Hint is 50 coins!</p>
+    </div>
+
+    <!-- Buttons on a new line after image -->
+    <div class="buttons-container">
+      <button id="buy">Buy</button>
+
+      <button onclick="closehintspopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{%endblock%}
+{% block scripts %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="static/duringgame.js"></script>
+<script>
+function openhintspopup() {
+  document.getElementById("HintsPopup").classList.add('open');
+}
+function closehintspopup() {
+  document.getElementById("HintsPopup").classList.remove('open');
+}
+document.getElementById('hints').addEventListener('click', function () {
+  openhintspopup();
+});
+
+function openpurpop() {
+  const modal = document.getElementById("purpop");
+  console.log(modal);  // Check if the modal element is being accessed correctly
+  console.log(modal.classList);  // Check the current class list of the modal
+
+  modal.style.display = "none";  // Force hide
+  modal.offsetHeight;  // Trigger reflow (flush)
+  modal.style.display = "block";  // Show again
+
+  modal.classList.add('open');
+  console.log(modal.classList);  // Check if the 'open' class is being added
+}
+
+function closepurpop() {
+  document.getElementById("purpop").classList.remove('open');
+}
+document.getElementById('buy').addEventListener('click', function () {
+  openpurpop();  
+  closehintspopup();
+  purchasehints('{{user_name}}');  // Execute the purchase function with the username
+});
+
+function closepurpop() {
+  $('#purpop').hide();  // Close the modal
+  $('#generating-hints-message').show();  // Reset message to show generating hints again
+  $('#purchase-error-message').hide();   // Hide error message
+}
+
+// Add event listener for the close icon
+document.getElementById('close-purpop').addEventListener('click', function() {
+  closepurpop();
+});
+
+
+function purchasehints(username) {
+  const data = {
+      userName: username,  // Dynamic username
+  };
+
+  // Show the popup and the "Generating hints, please wait..." message
+  $('#purpop').show();
+  $('#generating-hints-message').show();  // Show the loading message
+  $('#purchase-error-message').hide();   // Hide any previous error message
+
+  fetch('/purchase_hints', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.status === "success") {
+          console.log('Success:', data.message);
+          console.log('New Balance:', data.newBalance);
+          updateCoinBalance(data.newBalance);  // Update the UI with the new coin balance
+          
+          // Hide the generating hints message and start generating hints
+          generateHints();
+
+      } else {
+          console.log('Error:', data.message);
+
+          // Hide the "Generating hints" message and show the error message in the modal
+          $('#generating-hints-message').hide();
+          $('#purchase-error-message').text(data.message).show();
+      }
+  })
+  .catch((error) => {
+      console.error('Error:', error);
+
+      // Hide the "Generating hints" message and show a generic error message
+      $('#generating-hints-message').hide();
+      $('#purchase-error-message').text('An error occurred. Please try again.').show();
+  });
+}
+
+// Function to close the popup
+
+
+
+function updateCoinBalance(newBalance) {
+  console.log("Updating coins to:", newBalance);  // Debug log to check if this function is called
+  document.getElementById('coinsText').innerText = `${newBalance}`;
+}
+
+
+  // Function to get the value of a query parameter from the URL
+</script>
+{%endblock%}

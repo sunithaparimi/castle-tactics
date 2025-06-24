@@ -1,0 +1,503 @@
+{% extends 'base2.html' %}
+{% block title %} Start Page {% endblock %}
+{% block styles %}
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #2b2b2b;
+        color: white;
+    }
+
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 2vh; /* Space between options */
+        margin-top: 25vh;
+    }
+
+    .option {
+        width: 80%;
+        max-width: 20vw;
+        height: 30vh;
+        text-align: center;
+        margin: 2vh;
+        padding: 2vh;
+        background-color: #ffd700;
+        font-size: 1.8vh;
+        cursor: pointer;
+        border-radius: 0.5vw;
+        transition: background-color 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Centers content within the option box */
+    }
+
+    .option:hover {
+        background-color:  #ffd700;
+    }
+
+    /* Base popup style for all popups */
+    .popup {
+        position: fixed;
+        display: none;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 3vh;
+        border: 0.2vw solid #333;
+        z-index: 999;
+        width: 90%;
+        max-width: 35vw;
+    }
+
+    .popup p {
+        margin-bottom: 2vh;
+    }
+
+    .popup button {
+        padding: 1vh 2vw;
+        background-color: #2b2b2b;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .popup button:hover {
+        background-color: #cfcff2;
+    }
+
+    .popup-buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .popup-buttons button {
+        margin: 0 1vw;
+    }
+
+    /* Specific styles for invite popup */
+    #invitePopup, #invitepopup {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #2b2b2b;
+        padding: 3vh;
+        border: 0.5vw solid #333;
+        z-index: 999;
+        width: 90%;
+        max-width: 35vw;
+        box-sizing: border-box; /* Ensures padding doesn’t affect width */
+        text-align: center;
+    }
+
+    /* Specific styles for password popup */
+    #passwordPopup {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color :#2b2b2b;
+        padding: 3vh;
+        border: 0.5vw solid #333;
+        z-index: 999;
+        width: 90%;
+        max-width: 35vw;
+        box-sizing: border-box;
+        text-align: center;
+      
+    }
+
+    /* Specific styles for registration form popup */
+    #registrationForm {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #2b2b2b;
+    padding: 3vh;
+    border: 0.5vw solid #333;
+    z-index: 999;
+    width: 90%;
+    max-width: 35vw;
+    box-sizing: border-box;
+    text-align: center;
+    display: flex;
+    flex-direction: column; /* Ensure elements are stacked vertically */
+    gap: 1.5rem; /* Add space between elements */
+
+}
+
+    
+    #comp {
+        width: 20vw;
+    }
+
+    #frnd, #rand {
+        height: 15vh;
+    }
+
+    /* Adjustments for medium screens */
+    @media (max-width: 900px) {
+        .container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option {
+            max-width: 80%;
+            margin: 2vh 0;
+            padding: 2vh;
+            font-size: 2vh;
+        }
+
+        #frnd, #comp, #rand {
+            height: 25vh;
+            width: auto;
+        }
+    }
+    .passwordPopupclose{
+      padding-right:5vw;
+    }
+
+    /* Adjustments for smaller screens */
+    @media (max-width: 600px) {
+        .container {
+            margin-top: 5vh;
+        }
+
+        .option {
+            font-size: 2vw;
+            padding: 2vh;
+            max-width: 90%;
+        }
+
+        #frnd, #comp, #rand {
+            height: 20vh;
+        }
+
+        .popup {
+            padding: 3vh;
+            width: 80%;
+        }
+
+        .popup button {
+            padding: 1.5vh 2vw;
+            font-size: 2vw;
+        }
+    }
+
+    /* Very small screens */
+    @media (max-width: 400px) {
+        .option {
+            font-size: 2.5vw;
+            padding: 2vh;
+            max-width: 100%;
+        }
+
+        .popup {
+            padding: 2vh;
+            width: 90%;
+        }
+
+        .popup button {
+            padding: 1vh 2vw;
+            font-size: 2vw;
+        }
+
+        #frnd, #comp, #rand {
+            height: 15vh;
+        }
+    }
+</style>
+
+
+{% endblock %}
+{% block content %}
+<div class="container">
+<div class="option" onclick="openInvitePopup()">
+    <img src="https://pic.onlinewebfonts.com/svg/img_564348.svg" alt="Invite a Friend" id="frnd" /><br>
+    Invite a Friend
+    </div>
+    <div class="option" onclick="playWithComputer()">
+        <img src="https://chessforsharks.co/wp-content/uploads/How-do-chess-engines-work-1920x1080.jpg" alt="Play with Computer" id="comp"/><br>
+        Play with Computer
+    </div>
+    
+   
+</div>
+
+
+<!-- Invite Friend Popup -->
+<div id="invitePopup" style="display:none;text-align:left; padding-left: 12vw;">
+    <span class="invitePopupclose">&times;</span>
+    <h3>Select a Friend</h3>
+    <div id="friendsList">
+        <!-- Usernames with checkboxes will be populated dynamically -->
+    </div><br>
+    <button id="inviteButton" onclick="openPasswordPopup()" disabled>Invite</button>
+    <button id="register" onclick="openregistrationForm()">Register</button>
+</div>
+
+<div id="invitepopup" style="display:none;text-align:left; padding-left: 12vw;">
+    <span class="invitepopupclose">&times;</span>
+    <h3>Select a Friend</h3>
+    <div id="friendsList">
+        <!-- Usernames with checkboxes will be populated dynamically -->
+    </div><br>
+    <button id="invite" onclick="openPasswordPopup()" disabled>Invite</button>
+    <button id="cancel" onclick="openregistrationForm()"> Cancel</button>
+</div>
+
+<!-- Password Popup -->
+<div id="passwordPopup" style="display:none;">
+    <span class="passwordPopupclose">&times;</span>
+    <h3>Enter Password for <span id="invitedUserName"></span></h3>
+    <input type="password" id="passwordInput" placeholder="Enter password"><br><br>
+    <button onclick="submitInvite()">Submit</button>
+</div>
+
+<form id="registrationForm" style="display:none;  text-align:left; padding-left: 8vw">
+    <span class="registrationFormclose">&times;</span>
+    <label for="user_name">Username:</label>
+    <input type="text" id="user_name" name="user_name" required><br><br>
+
+    <label for="email_id">Email:</label>
+    <input type="email" id="email_id" name="email_id" required><br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label for="notification_status">Receive notifications</label>
+    <input type="checkbox" id="notification_status" name="notification_status"><br><br>
+
+
+    <button id="registerButton">Register</button>
+</form>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+    // Function to close the popup
+document.querySelector('.invitePopupclose').addEventListener('click', function() {
+    document.getElementById("invitePopup").style.display = 'none';
+});
+
+document.querySelector('.invitepopupclose').addEventListener('click', function() {
+    document.getElementById("invitepopup").style.display = 'none';
+});
+
+document.querySelector('.passwordPopupclose').addEventListener('click', function() {
+    document.getElementById("passwordPopup").style.display = 'none';
+});
+
+document.querySelector('.registrationFormclose').addEventListener('click', function() {
+    document.getElementById("registrationForm").style.display = 'none';
+});
+
+    document.getElementById("registerButton").addEventListener("click", function(event) {
+        event.preventDefault();  // Prevent default behavior
+    
+        // Collect form data
+        var user_name = document.getElementById("user_name").value;
+        var email_id = document.getElementById("email_id").value;
+        var password = document.getElementById("password").value;
+        var notification_status = document.getElementById("notification_status").checked ? 1 : 0;
+        var selectedFriends = getSelectedFriends();  // You can adapt this based on your form's structure
+    
+        // Prepare data to send via AJAX
+        var formData = {
+            user_name: user_name,
+            email_id: email_id,
+            password: password,
+            notification_status: notification_status,
+            selected_friends: selectedFriends
+        };
+    
+        // Send the data to the backend via AJAX
+        $.ajax({
+            url: '/register_with_invite',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                if (response.status === 'success') {
+                    if (response.redirect) {
+                        // Redirect to the 'duringgame' page with the relevant user data
+                        window.location.href = '/duringgame?player1=' + response.logged_in_user + '&player2=' + response.new_user + '&gameMode=two-player';
+                    }
+                } else {
+                    alert(response.message || 'Registration failed.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', status, error);
+                console.log('Response:', xhr.responseText); // Log the full error response here
+                alert('Failed to register.');
+            }
+        });
+    });
+    
+        
+    // Function to get selected friends
+    function getSelectedFriends() {
+        var selected = [];
+        // Loop through checkboxes, assuming you have checkboxes with class "friend-checkbox"
+        document.querySelectorAll(".friend-checkbox:checked").forEach(function(checkbox) {
+            selected.push(checkbox.value);
+        });
+        return selected;
+    }
+    
+
+    var currentUser = "{{ user_name }}";  // This will be replaced by the actual username in the template
+    console.log(currentUser); 
+    
+    function playWithComputer() {
+        window.location.href = '/duringgame?player1=' + '{{user_name}}' + '&player2=computer' + '&gameMode=computer';
+
+    }
+    function openInvitePopup() {
+        // Show invite friend popup
+        document.getElementById("invitePopup").style.display = 'block';
+        
+        // Fetch list of users (except the current user) from the backend
+        $.get('/get_friends', function(data) {
+            // Ensure we have a valid response
+            if (data && data.friends && data.friends.length > 0) {
+                let friendsListContainer = $('#friendsList');
+                friendsListContainer.empty();  // Clear any existing content
+                
+                // Populate the list with friend usernames and checkboxes
+                data.friends.forEach(function(friend) {
+                    let friendItem = $('<div class="friend-item"></div>');
+                    let checkbox = $('<input type="checkbox" class="friend-checkbox" data-username="' + friend.user_name + '">');
+                    let label = $('<span>' + friend.user_name + '</span>');
+                    
+                    // Append the checkbox and username
+                    friendItem.append(checkbox);
+                    friendItem.append(label);
+                    friendsListContainer.append(friendItem);
+                });
+    
+                // Attach event listeners to checkboxes
+                $('.friend-checkbox').change(function() {
+                    // Enable the invite button only if exactly one checkbox is selected
+                    let selectedCount = $('.friend-checkbox:checked').length;
+                    $('#inviteButton').prop('disabled', selectedCount !== 1);
+                });
+            } else {
+                alert("No friends found or failed to fetch friends.");
+            }
+        }).fail(function() {
+            alert("Failed to load friend list.");
+        });
+    }
+
+    function openInvitepopup() {
+        // Show invite friend popup
+        document.getElementById("invitepopup").style.display = 'block';
+        
+        // Fetch list of users (except the current user) from the backend
+        $.get('/get_friends', function(data) {
+            // Ensure we have a valid response
+            if (data && data.friends && data.friends.length > 0) {
+                let friendsListContainer = $('#friendsList');
+                friendsListContainer.empty();  // Clear any existing content
+                
+                // Populate the list with friend usernames and checkboxes
+                data.friends.forEach(function(friend) {
+                    let friendItem = $('<div class="friend-item"></div>');
+                    let checkbox = $('<input type="checkbox" class="friend-checkbox" data-username="' + friend.user_name + '">');
+                    let label = $('<span>' + friend.user_name + '</span>');
+                    
+                    // Append the checkbox and username
+                    friendItem.append(checkbox);
+                    friendItem.append(label);
+                    friendsListContainer.append(friendItem);
+                });
+    
+                // Attach event listeners to checkboxes
+                $('.friend-checkbox').change(function() {
+                    // Enable the invite button only if exactly one checkbox is selected
+                    let selectedCount = $('.friend-checkbox:checked').length;
+                    $('#inviteButton').prop('disabled', selectedCount !== 1);
+                });
+            } else {
+                alert("No friends found or failed to fetch friends.");
+            }
+        }).fail(function() {
+            alert("Failed to load friend list.");
+        });
+    }
+    
+    function openPasswordPopup() {
+        // Get the selected friend's username
+        let selectedFriend = $('.friend-checkbox:checked').data('username');
+        
+        if (selectedFriend) {
+            // Set the invited user's name in the password popup
+            document.getElementById("invitedUserName").textContent = selectedFriend;
+            
+            // Show password input popup and hide invite popup
+            document.getElementById("invitePopup").style.display = 'none';
+            document.getElementById("passwordPopup").style.display = 'block';
+        }
+    }
+
+    function openregistrationForm() {
+        document.getElementById("registrationForm").style.display = 'block';
+        document.getElementById("invitePopup").style.display = 'none';
+        }
+    
+    
+    function submitInvite() {
+        var currentUser = "{{ user_name }}";  // Fetch the current user from the template
+        var invitedUser = document.getElementById("invitedUserName").textContent;
+        var password = document.getElementById("passwordInput").value;
+    
+        // Log data to check if all values are correct
+        console.log("Current user: ", currentUser);
+        console.log("Invited user: ", invitedUser);
+        console.log("Password: ", password);
+    
+        // Send invite request to the backend
+        $.ajax({
+            url: '/invite_friend',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                invited_user: invitedUser,
+                password: password,
+                current_user: currentUser  // Send currentUser to the backend
+            }),
+            success: function(response) {
+                console.log("Server Response:", response);  // Log server response for debugging
+                if (response.success) {
+                    // Redirect to duringgame page with both usernames
+                    window.location.href = '/duringgame?player1=' + response.player1 + '&player2=' + response.player2 + '&gameMode=two-player';
+                } else {
+                    // Show error message if the password is incorrect or user not found
+                    alert(response.message || 'Password incorrect or error occurred.');
+                }
+            },
+            error: function(xhr, status, error) {
+                // Log any AJAX error for debugging
+                console.log("AJAX Error:", status, error);
+                alert('Failed to send request.');
+            }
+        });
+    }
+    
+    
+    
+</script>
+
+{% endblock %}

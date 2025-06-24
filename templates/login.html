@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% block title %} Login Page {% endblock %}
+{% block styles %}
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #444444; 
+  }
+  p {
+    color: #f1f1f1;
+  }
+
+  .main * {
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  .main {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 10vh; /* Reduced size */
+    width: 20vw; /* Reduced size */
+    border: 0.2vw solid rgba(180, 180, 196);
+    padding: 3vw 3vw; /* Reduced size */
+    border-radius: 1vw; /* Reduced size */
+    background-color: #444444; 
+  }
+
+  .main h1 {
+    margin-top: 1%;
+    text-align: center;
+    font-size: 2vw; /* Reduced size */
+    margin-bottom: 7vh;
+  }
+
+  .input-box {
+    width: 100%;
+    height: 6.5vh; /* Reduced size */
+    margin: 2.5vh 0; /* Reduced size */
+    position: relative; 
+  }
+
+  .input-box input {
+    width: 100%;
+    height: 100%;
+    background-color: snow white;
+    border: none;
+    outline: none;
+    border: 0.2vw solid snow white;
+    border-radius: 1.8vw; /* Reduced size */
+    font-size: 1vw; /* Reduced size */
+    padding: 1.5vw 3vw 1vw 1.8vw; /* Reduced size */
+  }
+
+  .input-box input::placeholder {
+    font-size: 1vw; /* Reduced size */
+    background-color: snow white;
+  }
+
+  .input-box i {
+    position: absolute;
+    right: 1.8vw; /* Reduced size */
+    top: 2vh;
+    font-size: 1vw; /* Reduced size */
+  }
+
+  .main .forgot {
+    display: flex;
+    flex-direction: row-reverse;
+    font-size: 1.1vw; /* Reduced size */
+    margin: -1.8vh 0 1.8vh; /* Reduced size */
+  }
+
+  .forgot p:hover {
+    color: rgb(0, 255, 1);
+    cursor: pointer;
+  }
+
+  .forgot p:active {
+    text-decoration: none;
+    color: rgb(0, 255, 1);
+  }
+
+  .main .button {
+    width: 100%;
+    height: 7vh; /* Reduced size */
+    border: none;
+    outline: none;
+    border-radius: 2vw; /* Reduced size */
+    font-size: 1.1vw; /* Reduced size */
+    font-weight: 800;
+    cursor: pointer;
+    background-color: #ffd700;
+    align-items: center;
+  }
+
+  .main .button:hover {
+    background-color: #ffa500;
+  }
+
+  .main .button:active {
+    font-size: 1vw; /* Reduced size */
+  }
+
+  .main .Register {
+    text-align: center; 
+    margin: 2vh 0 1.5vh; /* Reduced size */
+    font-size: 1.3vw; /* Reduced size */
+    color: #000000;
+  }
+
+  h1 {
+    color: #ffa500;
+  }
+
+  .Register p a {
+    text-decoration: none;
+    color: #e1e1f6;
+    font-weight: 700;
+    color: rgb(0, 255, 1);
+  }
+
+  .Register p a:hover {
+    text-decoration: none;
+    font-size: 1.5vw; /* Reduced size */
+    color: rgb(77, 197, 231);
+  }
+
+  .Register p a:active {
+    text-decoration: none;
+    color: #58739a;
+    font-size: 1vw; /* Reduced size */
+  }
+
+  section {
+    margin: 2.5vh; /* Reduced size */
+    padding: 2.5vh; /* Reduced size */
+    background-color: #444444;
+    border-radius: 1.5vw; /* Reduced size */
+    box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.1);
+  }
+
+ /* Media queries for responsive design */
+
+@media (max-width: 1400px) {
+    .main {
+        width: 20vw;
+    }
+
+    .main h1 {
+        font-size: 2.5vw;
+    }
+
+    .input-box input {
+        height: 5.5vh;
+        font-size: 1.3vw;
+    }
+
+    .button {
+        font-size: 1.3vw;
+    }
+
+    .forgot {
+        font-size: 1.5vw; /* Increased font size */
+    }
+}
+
+@media (max-width: 999px) {
+    .main {
+        width: 35vw;
+    }
+
+    .main h1 {
+        font-size: 3vw;
+    }
+
+    .input-box input {
+        height: 5vh;
+        font-size: 1.5vw;
+    }
+
+    .button {
+        font-size: 1.5vw;
+    }
+
+    .forgot {
+        font-size: 1.7vw; /* Increased font size */
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        width: 40vw;
+    }
+
+    .main h1 {
+        font-size: 3.5vw;
+    }
+
+    .input-box input {
+        height: 4.5vh;
+        font-size: 1.8vw;
+    }
+
+    .button {
+        font-size: 1.8vw;
+    }
+
+    .forgot {
+        font-size: 2vw; /* Increased font size */
+    }
+}
+
+@media (max-width: 576px) {
+    .main {
+        width: 50vw;
+    }
+
+    .main h1 {
+        font-size: 4vw;
+    }
+
+    .input-box input {
+        height: 4vh;
+        font-size: 2vw;
+    }
+
+    .button {
+        font-size: 2vw;
+    }
+
+    .forgot {
+        font-size: 2.3vw; /* Increased font size */
+    }
+}
+
+@media (max-width: 400px) {
+    .main {
+        width: 60vw;
+    }
+
+    .main h1 {
+        font-size: 4.5vw;
+    }
+
+    .input-box input {
+        height: 3.5vh;
+        font-size: 2.5vw;
+    }
+
+    .button {
+        font-size: 2.5vw;
+    }
+
+    .forgot {
+        font-size: 2.5vw; /* Increased font size */
+    }
+}
+</style>
+{% endblock %}
+{% block content %}
+<section class="main">
+    <form method="POST" action="/login">
+        <h1>Login</h1>
+        {{ form.hidden_tag() }} 
+        <div class="input-box">
+            {{ form.user_name(class="input-field", placeholder="User Name", required=True) }}
+            <i class="fa-solid fa-envelope"></i>
+            {% for error in form.user_name.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="input-box">
+            {{ form.password(class="input-field", placeholder="Password", required=True) }}
+            <i class="fa-solid fa-lock"></i>
+            {% for error in form.password.errors %}
+                <span class="error">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="forgot">
+            <p>Forgot Password?</p>
+        </div>
+        <button type="submit" class="button">Login</button>
+        <div class="Register">
+            <p>Don't have an account? <a href="/register">Register</a></p>
+        </div>
+    </form>
+</section>
+    
+{%endblock%}
+{% block scripts %}
+<script type="module" src="firebase-setup.js"></script>
+    <script type="module"> 
+        import { auth, signInWithEmailAndPassword, sendPasswordResetEmail } from './firebase-setup.js';
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.querySelector("form");
+            const emailInput = loginForm.querySelector("input[type='text']");
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const password = loginForm.querySelector("input[type='password']").value;
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    window.location.href = "chatbot.html";
+                } catch (error) {
+                    alert("Failed to login: " + error.message);
+                }
+            });
+            const forgotPassword = document.querySelector(".forgot");
+            forgotPassword.addEventListener("click", async (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                if (email) {
+                    try {
+                        await sendPasswordResetEmail(auth, email);
+                        alert("Password reset email sent!");
+                    } catch (error) {
+                        alert("Error: " + error.message);
+                    }
+                } else {
+                    alert("Please enter your email address first.");
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    {% block styles %} {% endblock %}
+</head>
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #2b2b2b; 
+        color: #f1f1f1;
+      
+      }
+
+
+  .navbar {
+      background-color: #444444;
+      padding: 2vh 0;
+      margin-top: 1vh;
+      border-radius: 0.5vh;
+      font-size: 2.5vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 5vw;
+  }
+
+  .left-links, .right-links {
+      display: flex;
+      align-items: center;
+  }
+
+  /* Set a fixed size for the logo */
+      .left-links img.logo {
+          width: 5vw;
+          height: 5vw;
+          border-radius: 50%;
+          margin-right: 1vw;
+      }
+
+  a {
+      color: #ffd700;
+  padding-left: 5vw;
+  font-family: Arial, Helvetica, sans-serif;
+  text-decoration: none;
+  }
+
+  .navbar .left-links {
+      display: flex;
+  }
+
+  .navbar .right-links {
+      display: flex;
+  }
+
+  .logo {
+      padding-left: 3vw;
+  }
+
+  /* Show menu-icon on smaller screens */
+  .menu-icon {
+      display: none;
+      padding-left: 5vw;
+  }
+
+  /* Sidebar and profile bar styles */
+  .sidebar,
+  .profilebar {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+  }
+
+  .sidebar.open,
+  .profilebar.open {
+      display: block !important;
+  }
+
+  .sidebar-content {
+      position: absolute;
+      top: 8vh;
+      padding-top: 5vh;
+      right: 2vw;
+      height: 90%;
+      width: 20vw;
+      background-color: #555555;
+      box-shadow: -2vw 0 10vw rgba(0, 0, 0, 0.5);
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start;
+      padding: 2vw;
+  }
+
+  .sidebar-content a {
+      margin: 1vh 0;
+      text-decoration: none;
+      color: #ffd700;
+      font-size: 1.5vh;
+  }
+
+  /* Media query for screens up to 600px */
+  @media screen and (max-width: 600px) {
+      /* Hide the links but keep the logo and show menu-icon */
+      .left-links a, 
+      .right-links a {
+          display: none !important;
+      }
+
+      .left-links {
+          justify-content: left;
+          width: 100%;
+      }
+
+      /* Keep logo size consistent for small screens */
+      .left-links img.logo {
+          width: 10vw;
+          height: 10vw;
+      }
+
+      .menu-icon {
+          display: block;
+      }
+  }
+
+  @media screen and (min-width: 601px) {
+      /* Hide the menu icon on larger screens */
+      .menu-icon {
+          display: none;
+      }
+      
+      .sidebar-content {
+          display: none;
+      }
+  }
+   
+</style>
+<body>
+    <nav class="navbar">
+        <div class="left-links">
+            <img src="static\logo-removebg-preview.png" alt="Logo" class="logo"> <!-- Replace path/to/logo.png with your actual logo path -->
+       
+            <a href="/" class="home">Home</a>
+        </div>
+        <div class="right-links">
+            <a href="/login" class="home">Login</a>
+            <a href="/register" class="home">Register</a>
+            <a href="/about" class="home">About</a>
+        </div>
+     <div id="menu-icon" class="menu-icon ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" style="fill: rgba(239, 236, 236, 1);transform: ;msFilter:;"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+       
+        </div>
+    </nav>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-content">
+            <div class="close-sidebar">
+                <svg width="10" height="10" viewBox="0 0 10 10" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 24 24"
+                 fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor" onclick="closeSidebar()">
+                    <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/></g></svg>
+            </div>
+            <a href="/" class="home">Home</a>
+            <a href="/login" class="leaderboard">Login</a>
+            <a href="/register" class="home">Register</a>
+            <a href="/about" class="home">About</a>   
+        </div>
+    </div>
+    
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+      <div class="scripts">
+        {% block scripts %}{% endblock %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script>
+        // Function to open sidebar
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add('open');
+        }
+
+        // Function to close sidebar
+        function closeSidebar() {
+            document.getElementById("sidebar").classList.remove('open');
+        }
+
+        // Toggle sidebar on menu icon click
+        document.getElementById('menu-icon').addEventListener('click', function () {
+            openSidebar();
+        });
+    </script> 
+</body>
+</html>
+</body>
+</html>

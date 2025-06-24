@@ -1,0 +1,67 @@
+{% if 'user_name' in session %}
+    {% extends 'base2.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
+{% block title %} About Page {% endblock %}
+{% block styles %}
+<style>
+   
+      
+      body {
+          font-family: 'Roboto', sans-serif;
+          background-color: #2b2b2b; 
+          color: #f1f1f1;
+        
+        }
+        
+        h2{
+          padding: 0px 10px; 
+          color: #ffa500;
+
+        }
+        .thanking {
+          margin-top:0.00005px;
+          text-align: center;  
+        }
+        section {
+          margin: 20px;
+          padding: 20px;
+          background-color: #4b4b4b; /* Dark gray for a cohesive look */
+          border-radius: 5px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+       u{
+        color:#ffd700;
+        text-decoration-line: none;
+       }    
+</style>
+{% endblock %}
+{% block content %}
+<section id="About Us">
+<h2>About Us</h2>  
+<p> Welcome to <b>CastleTactics</b>, your ultimate resource for all things chess! Our mission is to promote the game of chess by providing players of all levels with comprehensive resources, tools, and a supportive community.</p>
+</section>
+<section id="Who We Are">
+<h2>Who We Are</h2>
+ <p> We are a team of passionate chess enthusiasts and experienced players dedicated to sharing our love for the game. Whether you’re a complete beginner or a seasoned grandmaster, we aim to create an inclusive environment where everyone can learn, improve, and enjoy chess.</p>
+</section>
+<section id="What We Offer">
+<h2>What We Offer</h2>
+ <p> <u>Educational Content:</u> Our website features a wide range of tutorials, articles, and guides that cover everything from basic rules to advanced strategies.<br>
+ <u>Interactive Tools:</u> Practice your skills with puzzles, quizzes, and interactive analysis tools to enhance your understanding of the game.<br>
+ <u>Community Engagement:</u> Join our forums and discussion boards to connect with other chess players, share your experiences, and participate in friendly debates.<br>
+ <u>Latest News:</u> Stay updated on the chess world with our news section, which covers tournament results, player profiles, and important events.</p>
+</section>
+<section id="Our Vision">
+<h2>Our Vision</h2>
+ <p> At <b>CastleTactics</b>, we believe that chess is more than just a game; it’s a way to develop critical thinking, problem-solving skills, and sportsmanship. We strive to make chess accessible to everyone, fostering a community where players can grow together.</p>   
+</section>
+<section id="Get Involved">
+<h2>Get Involved</h2>
+ <p> We invite you to explore our resources, engage with our community, and share your chess journey with us. Whether you're here to learn, compete, or connect, there’s something for everyone at <b>CastleTactics</b>.</p> 
+<br><br>
+<h2 class="thanking">Thank you for visiting, and we hope you enjoy your experience on our site!</h2>
+</section>
+{%endblock%}

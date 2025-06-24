@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    {% block styles %} {% endblock %}
+</head>
+<style>
+/* Navbar styles */
+.navbar {
+    background-color: #444444;
+    padding: 2vh;
+    margin-top: 1vh;
+    border-radius: 1vh;
+    font-size: 2.5vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 7vw;
+}
+
+a {
+    color: #ffd700;
+    padding-left: 5vw;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+}
+
+.navbar .left-links {
+    display: flex;
+    align-items: center;
+}
+
+.navbar .right-links {
+    display: flex;
+    align-items: center;
+}
+
+.left-links img.logo {
+    width: 5vw;
+    height: 5vw;
+    border-radius: 50%;
+    margin-left: 3vw;
+}
+
+.menu-icon {
+    display: block;
+    padding-left: 3vw;
+}
+
+/* Sidebar and profile bar styles */
+.sidebar, .profilebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+}
+
+.sidebar.open,
+.profilebar.open {
+    display: block !important;
+}
+
+.sidebar-content {
+    position: absolute;
+    top: 7vh;
+    padding-top: 5vh;
+    right: 2vw;
+    height: 90%;
+    width: 200px;
+    background-color: #555555;
+    box-shadow: -0.2vw 0 1vw rgba(0, 0, 0, 0.5);
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start;
+    padding: 2vw;
+}
+
+.sidebar-content a {
+    margin: 1vh 0;
+    text-decoration: none;
+    color: #ffd700;
+    font-size: 1.5vh;
+}
+
+/* Profile bar styles */
+.profilebar {
+    display: none;
+    position: fixed;
+    top: 10vh;
+    right: 2vw;
+    bottom: 0;
+    height: 50vh;
+    background-color: #333333;
+    z-index: 1000;
+}
+
+.profilebar.open {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.profilebar-content {
+    padding-top: 1vh;
+    width: 250px;
+    background-color: #444444;
+    box-shadow: -0.2vw 0 1vw rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-out;
+    transform: translateX(100%);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2vw;
+    color: #f1f1f1;
+}
+
+.profilebar.open .profilebar-content {
+    transform: translateX(0);
+}
+
+/* Additional styles for logout and notifications */
+.logout-icon,
+.Block-notifications,
+.allow-notifications {
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    border-top: solid #ffa500 0.1vw;
+    color: #ffd700;
+}
+
+#profile-icon {
+    vertical-align: middle;
+    margin-right: 0.8vw;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    color: #ffd700;
+    text-decoration: none;
+}
+
+.profile:hover {
+    color: #ffffff;
+}
+
+/* Media queries */
+
+/* For screen sizes 950px and below */
+@media screen and (max-width: 950px) {
+    .left-links a, 
+    .right-links a {
+        display: none !important;
+    }
+
+    .left-links {
+        justify-content: left;
+        width: 100%;
+    }
+
+    /* Logo size for screens 950px or smaller */
+    .left-links img.logo {
+        width: 7vw;
+        height: 7vw;
+    }
+
+    .menu-icon {
+        display: block;
+    }
+}
+
+/* For screen sizes 460px and below */
+@media screen and (max-width: 460px) {
+    .left-links a, 
+    .right-links a {
+        display: none !important;
+    }
+
+    .left-links {
+        justify-content: left;
+        width: 100%;
+    }
+
+    /* Logo size for screens 460px or smaller */
+    .left-links img.logo {
+        width: 10vw;
+        height: 10vw;
+    }
+
+    .menu-icon {
+        display: block;
+    }
+}
+
+@media screen and (min-width: 950px) {
+    .menu-icon {
+        display: none;
+    }
+
+    .sidebar-content {
+        display: none;
+    }
+}
+
+</style>
+<body>
+    <nav class="navbar">
+        <div class="left-links">
+            <img src="static\logo-removebg-preview.png" alt="Logo" class="logo"> <!-- Replace path/to/logo.png with your actual logo path -->
+        <a href="/" class="home">Home</a>
+        </div>
+        <div class="right-links">
+        <a href="/leaderboard" class="leaderboard">Leader Board</a>
+        <a href="/userstats" class="home">Userstats</a>
+        <a href="/learn" class="home">Learn</a>
+        <a href="/about" class="home">About</a>
+        <a href="/logout" class="home">Logout</a><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" id="profile-icon" class="logo"style="fill: rgba(239, 236, 236, 1);transform: ;msFilter:;"><path d="M12 2A10.13 10.13 0 0 0 2 12a10 10 0 0 0 4 7.92V20h.1a9.7 9.7 0 0 0 11.8 0h.1v-.08A10 10 0 0 0 22 12 10.13 10.13 0 0 0 12 2zM8.07 18.93A3 3 0 0 1 11 16.57h2a3 3 0 0 1 2.93 2.36 7.75 7.75 0 0 1-7.86 0zm9.54-1.29A5 5 0 0 0 13 14.57h-2a5 5 0 0 0-4.61 3.07A8 8 0 0 1 4 12a8.1 8.1 0 0 1 8-8 8.1 8.1 0 0 1 8 8 8 8 0 0 1-2.39 5.64z"></path><path d="M12 6a3.91 3.91 0 0 0-4 4 3.91 3.91 0 0 0 4 4 3.91 3.91 0 0 0 4-4 3.91 3.91 0 0 0-4-4zm0 6a1.91 1.91 0 0 1-2-2 1.91 1.91 0 0 1 2-2 1.91 1.91 0 0 1 2 2 1.91 1.91 0 0 1-2 2z"></path></svg>
+        </div>
+        <div id="menu-icon" class="menu-icon ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" style="fill: rgba(239, 236, 236, 1);transform: ;msFilter:;"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+        </div>
+    </nav>
+    <div class="profilebar" id="profilebar">
+        <div class="profilebar-content">
+            <div class="close-profilebar">
+                <svg width="10" height="10" viewBox="0 0 10 10" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 24 24"
+                fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor" onclick="closeProfilebar()">
+                   <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/></g></svg>
+            </div>
+            <br>
+            <div>
+                {% if 'user_name' in session %}
+                <p>Welcome, {{ user_name }}</p>
+                <p>ID: {{ email_id }}</p>
+                <p>Notifications:
+                    {% if is_notifications_on %}
+                    On
+                    {% else %}
+                    Off
+                    {% endif %}
+                </p>
+            </div>
+            <div id="logout-icon" class="logout-icon">
+                <a href="/logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: rotate(90deg);msFilter:progid:DXImageTransform.Microsoft.BasicImage(rotation=1);"><path d="M11 15h2V9h3l-4-5-4 5h3z"></path><path d="M20 18H4v-7H2v7c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2v-7h-2v7z"></path></svg>
+                    <span>Logout</span>
+                </a>
+            </div>
+            {% if is_notifications_on %}
+            <div class="Block-notifications" onclick="notifications('{{ url_for('update_notification_status', next=request.url ) }}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M12 22a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22zm9-4v-2a.996.996 0 0 0-.293-.707L19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258c-1.323.364-2.463 1.128-3.346 2.127L3.707 2.293 2.293 3.707l18 18 1.414-1.414-1.362-1.362A.993.993 0 0 0 21 18zM12 5c2.757 0 5 2.243 5 5v4c0 .266.105.52.293.707L19 16.414V17h-.586L8.207 6.793C9.12 5.705 10.471 5 12 5zm-5.293 9.707A.996.996 0 0 0 7 14v-2.879L5.068 9.189C5.037 9.457 5 9.724 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h10.879l-2-2H5v-.586l1.707-1.707z"></path></svg>
+                    <span>Block Notifications </span>
+                </div>
+            {% else %}
+            <div class="allow-notifications" onclick="notifications('{{ url_for('update_notification_status', next=request.url ) }}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="M19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258C7.185 4.074 5 6.783 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a.996.996 0 0 0-.293-.707L19 13.586zM19 17H5v-.586l1.707-1.707A.996.996 0 0 0 7 14v-4c0-2.757 2.243-5 5-5s5 2.243 5 5v4c0 .266.105.52.293.707L19 16.414V17zm-7 5a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22z"></path></svg>
+                <span>Allow Notifications</span>
+            </a>
+            </div>
+                    
+            {% endif %}
+          {% endif %}
+        </div>
+    </div>
+    
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-content">
+            <div class="close-sidebar">
+                <svg width="10" height="10" viewBox="0 0 10 10" style="color:currentColor" xmlns="http://www.w3.org/2000/svg" class="h-full w-full"><rect width="512" height="512" x="0" y="0" rx="30" fill="transparent" stroke="transparent" stroke-width="0" stroke-opacity="100%" paint-order="stroke"></rect></svg><svg width="40px" height="40px" viewBox="0 0 24 24"
+                 fill="currentColor" x="236" y="236" role="img" style="display:inline-block;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor" onclick="closeSidebar()">
+                    <path fill="currentColor" d="M16.066 8.995a.75.75 0 1 0-1.06-1.061L12 10.939L8.995 7.934a.75.75 0 1 0-1.06 1.06L10.938 12l-3.005 3.005a.75.75 0 0 0 1.06 1.06L12 13.06l3.005 3.006a.75.75 0 0 0 1.06-1.06L13.062 12l3.005-3.005Z"/></g></svg>
+            </div>
+            <a href="/" class="home">Home</a>
+            <a href="/leaderboard" class="leaderboard">Leader Board</a>
+            <a href="/userstats" class="home">Userstats</a>
+            <a href="/learn" class="home">Learn</a>
+            <a href="/about" class="home">About</a>      
+            </a>    
+        </div>
+    </div>
+    
+    
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>                    
+    <div class="scripts">
+        {% block scripts %}{% endblock %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+   
+      
+    <script>
+
+        function notifications(url) {
+            window.location.href = url;
+        }
+
+        // Function to open sidebar
+        function openSidebar() {
+            document.getElementById("sidebar").classList.add('open');
+        }
+
+        // Function to close sidebar
+        function closeSidebar() {
+            console.log("closing profile bar");
+            document.getElementById("sidebar").classList.remove('open');
+        }
+        function openProfilebar() {
+            console.log("Opening profile bar");
+            document.getElementById("profilebar").classList.add('open');
+            console.log("Profile bar opened:", profilebar.classList.contains('open')); 
+        }
+        function closeProfilebar() {
+            document.getElementById("profilebar").classList.remove('open');
+        }
+
+        // Toggle sidebar on menu icon click
+        document.getElementById('menu-icon').addEventListener('click', function () {
+            openSidebar();
+        });
+        document.getElementById('profile-icon').addEventListener('click', function () {
+            openProfilebar();
+        });
+
+    </script> 
+</body>
+</html>
