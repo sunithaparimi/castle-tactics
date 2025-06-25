@@ -12,8 +12,8 @@ from flask import abort
 import logging
 from flask_cors import CORS
 logging.basicConfig(level=logging.DEBUG)
-import firebase_admin
-from firebase_admin import credentials, messaging, initialize_app
+#import firebase_admin
+#from firebase_admin import credentials, messaging, initialize_app
 from datetime import datetime
 from flask_socketio import SocketIO, emit, join_room
 from dotenv import load_dotenv
@@ -25,9 +25,9 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.secret_key = 'your_secret_key'
-cred = credentials.Certificate(r'C:\Users\suhia\OneDrive\Desktop\chess dbis minor proj\castle-tactics-75ea9-firebase-adminsdk-uy0le-cdeec9fc32.json')
+#cred = credentials.Certificate(r'C:\Users\suhia\OneDrive\Desktop\chess dbis minor proj\castle-tactics-75ea9-firebase-adminsdk-uy0le-cdeec9fc32.json')
 
-firebase_admin.initialize_app(cred)
+#firebase_admin.initialize_app(cred)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
