@@ -43,7 +43,7 @@ mysql = MySQL(app)
 
 def validate_user_id(form, field):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM USER_DETAILS WHERE user_name=%s", (field.data,))
+    cursor.execute("SELECT * FROM user_details WHERE user_name=%s", (field.data,))
     user = cursor.fetchone()
     cursor.close()
     if user:
@@ -84,7 +84,7 @@ def home2():
     is_notifications_on = notification_status == b'\x01'
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     if user:
@@ -102,7 +102,7 @@ def start():
 
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     if user:
@@ -118,7 +118,7 @@ def login():
         password = form.password.data  
 
         cursor = mysql.connection.cursor()
-        cursor.execute("SELECT password, email_id, notification_status FROM USER_DETAILS WHERE user_name = %s", (user_name,))
+        cursor.execute("SELECT password, email_id, notification_status FROM user_details WHERE user_name = %s", (user_name,))
         user = cursor.fetchone()
         
         if user and bcrypt.checkpw(password.encode('utf-8'), user[0].encode('utf-8')):  
@@ -127,7 +127,7 @@ def login():
             session['email_id'] = user[1]  # Store the email_id from the database
             session['notification_status'] = user[2]  # Store the notification status
 
-            cursor.execute("UPDATE USER_DETAILS SET availability = 1 WHERE user_name = %s", (user_name,))
+            cursor.execute("UPDATE user_details SET availability = 1 WHERE user_name = %s", (user_name,))
             mysql.connection.commit()
 
             flash(f'Login successful for User Name: {user_name}')
@@ -152,14 +152,14 @@ def register():
         
         try:
             cursor.execute(
-                "INSERT INTO USER_DETAILS (user_name, email_id, notification_status, password) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO user_details (user_name, email_id, notification_status, password) VALUES (%s, %s, %s, %s)",
                 (user_name, email_id, notification_status, hashed_password)
             )
             mysql.connection.commit()
 
             # Create user stats
             # Create user stats
-            cursor.execute("INSERT INTO USER_STATS (user_name, coins, no_of_games_played, no_of_lost, no_of_won, no_of_drawn) VALUES (%s, %s, %s, %s, %s, %s)", (user_name,300 , 0, 0, 0, 0))
+            cursor.execute("INSERT INTO user_stats (user_name, coins, no_of_games_played, no_of_lost, no_of_won, no_of_drawn) VALUES (%s, %s, %s, %s, %s, %s)", (user_name,300 , 0, 0, 0, 0))
             mysql.connection.commit()
 
             flash('Registration successful!')
@@ -198,14 +198,14 @@ def register_with_invite():
         # Database insertion logic
         cursor = mysql.connection.cursor()  # Initialize cursor here
         cursor.execute(
-            "INSERT INTO USER_DETAILS (user_name, email_id, notification_status, password) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO user_details (user_name, email_id, notification_status, password) VALUES (%s, %s, %s, %s)",
             (user_name, email_id, notification_status, hashed_password)
         )
         mysql.connection.commit()
 
         # Insert user stats (e.g., initial coins)
         initial_coins = 300
-        cursor.execute("INSERT INTO USER_STATS (user_name, coins) VALUES (%s, %s)", (user_name, initial_coins))
+        cursor.execute("INSERT INTO user_stats (user_name, coins) VALUES (%s, %s)", (user_name, initial_coins))
         mysql.connection.commit()
 
         # Get logged-in user from session
@@ -237,7 +237,7 @@ def get_friends():
     
     try:
         # Query to fetch all users except the current user
-        cursor.execute("SELECT user_name FROM USER_DETAILS WHERE user_name != %s", (current_user,))
+        cursor.execute("SELECT user_name FROM user_details WHERE user_name != %s", (current_user,))
         friends = cursor.fetchall()
         
         # Return the list of friends as JSON
@@ -278,7 +278,7 @@ def invite_friend():
         cursor = mysql.connection.cursor()
 
         # Fetch the hashed password for the invited user from the DB
-        cursor.execute("SELECT password FROM USER_DETAILS WHERE user_name = %s", (invited_user,))
+        cursor.execute("SELECT password FROM user_details WHERE user_name = %s", (invited_user,))
         result = cursor.fetchone()
 
         # Log the query result for debugging
@@ -326,7 +326,7 @@ def send_invitation():
         return jsonify({"status": "error", "message": "Friend username is missing."}), 400
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT user_name FROM USER_DETAILS WHERE user_name = %s", (friend_username,))
+    cursor.execute("SELECT user_name FROM user_details WHERE user_name = %s", (friend_username,))
     friend = cursor.fetchone()
 
     if friend:
@@ -424,7 +424,7 @@ def handle_accept_invite(data):
 
     # Ensure both users exist in the database (assuming MySQL is being used)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT user_name FROM USER_DETAILS WHERE user_name IN (%s, %s)", (inviter, invitee))
+    cursor.execute("SELECT user_name FROM user_details WHERE user_name IN (%s, %s)", (inviter, invitee))
     users = cursor.fetchall()
     if len(users) < 2:
         print(f"Error: One or both users ({inviter}, {invitee}) do not exist.")
@@ -458,14 +458,14 @@ def update_notification_status():
         user_name = session['user_name']
         cursor = mysql.connection.cursor()
         
-        cursor.execute("SELECT notification_status FROM USER_DETAILS WHERE user_name = %s", (user_name,))
+        cursor.execute("SELECT notification_status FROM user_details WHERE user_name = %s", (user_name,))
         current_status = cursor.fetchone()[0]
 
        
         new_status = b'\x00' if current_status == b'\x01' else b'\x01'
         
        
-        cursor.execute("UPDATE USER_DETAILS SET notification_status = %s WHERE user_name = %s", (new_status, user_name))
+        cursor.execute("UPDATE user_details SET notification_status = %s WHERE user_name = %s", (new_status, user_name))
         mysql.connection.commit()
         
         
@@ -486,7 +486,7 @@ def logout():
         cursor = mysql.connection.cursor()
         
         # Update availability to 0 (logged out)
-        cursor.execute("UPDATE USER_DETAILS SET availability = 0 WHERE user_name = %s", (user_name,))
+        cursor.execute("UPDATE user_details SET availability = 0 WHERE user_name = %s", (user_name,))
         mysql.connection.commit()
         
         # Remove user information from the session
@@ -504,7 +504,7 @@ def about():
     is_notifications_on = notification_status == b'\x01'
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     if user:
@@ -522,7 +522,7 @@ def leaderboard():
 
     # Fetch user details for the session user
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     # Check if user exists
@@ -542,9 +542,9 @@ def leaderboard():
         u.coins,
         COALESCE(u.user_rank, 'Unranked') AS user_rank  -- Handle NULL rank values and assign a default 'Unranked' value
     FROM 
-        USER_STATS u
+        user_stats u
     LEFT JOIN 
-        PREVIOUSLY_PLAYED p ON u.user_name = p.user_name
+        previously_played p ON u.user_name = p.user_name
     GROUP BY 
         u.user_name, u.no_of_games_played, u.no_of_won, u.coins, u.user_rank
     ORDER BY 
@@ -571,7 +571,7 @@ def userstats():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
     # Fetch user details (email, notification status) from the USER_DETAILS table
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     if user:
@@ -584,12 +584,12 @@ def userstats():
             gd.end_time,
             dt.start_time 
         FROM 
-            GAME_DETAILS gd
+            game_details gd
         JOIN 
-            PREVIOUSLY_PLAYED pp 
+            previously_played pp 
             ON gd.game_id = pp.game_id
         JOIN 
-            DETAILS_TRANSFER dt 
+            details_transfer dt 
             ON gd.game_id = dt.game_id
         WHERE 
             pp.user_name = %s
@@ -647,7 +647,7 @@ def learn():
     is_notifications_on = notification_status == b'\x01'
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name, ))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name, ))
     user = cursor.fetchone()
 
     if user:
@@ -684,22 +684,22 @@ def duringgame():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     # Get user details
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user_details = cursor.fetchone()
     
     # Get coins
-    cursor.execute("SELECT coins FROM USER_STATS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT coins FROM user_stats WHERE user_name=%s", (user_name,))
     coins_data = cursor.fetchone()
 
     # Check if we got the coins data
     coins = coins_data['coins'] if coins_data else None
 
     # Set availability to 0 (engaged in game)
-    cursor.execute("UPDATE USER_DETAILS SET availability = 0 WHERE user_name = %s", (user_name,))
+    cursor.execute("UPDATE user_details SET availability = 0 WHERE user_name = %s", (user_name,))
     mysql.connection.commit()
     
     # Retrieve updated user info if needed
-    cursor.execute("SELECT email_id, notification_status FROM USER_DETAILS WHERE user_name=%s", (user_name,))
+    cursor.execute("SELECT email_id, notification_status FROM user_details WHERE user_name=%s", (user_name,))
     user = cursor.fetchone()
 
     # Get player1 and player2 from URL parameters
@@ -786,7 +786,7 @@ def submit_score():
 
         # 1. Insert or update game details
         cursor.execute("""
-            INSERT INTO GAME_DETAILS (game_id, end_time)
+            INSERT INTO game_details (game_id, end_time)
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
         """, (game_id, end_time))
@@ -794,20 +794,20 @@ def submit_score():
 
         # 2. Insert into DETAILS_TRANSFER for both players
         cursor.execute("""
-            INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+            INSERT INTO details_transfer (user_name, game_id, start_time)
             VALUES (%s, %s, %s)
         """, (player1, game_id, start_time))
         print(f"Details transferred for player1={player1} in game_id={game_id} at start_time={start_time}")
         if player2:
             cursor.execute("""
-                INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                INSERT INTO details_transfer (user_name, game_id, start_time)
                 VALUES (%s, %s, %s)
             """, (player2, game_id, start_time))
             print(f"Details transferred for player2={player2} in game_id={game_id} at start_time={start_time}")
 
         # 3. Insert into PREVIOUSLY_PLAYED table with scores and positions
         cursor.execute("""
-            INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+            INSERT INTO previously_played (game_id, user_name, score, user_position)
             VALUES (%s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE score = score + VALUES(score)
         """, (game_id, player1, score1, position1))
@@ -815,7 +815,7 @@ def submit_score():
 
         if player2:
             cursor.execute("""
-                INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+                INSERT INTO previously_played (game_id, user_name, score, user_position)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE score = score + VALUES(score)
             """, (game_id, player2, score2, position2))
@@ -823,7 +823,7 @@ def submit_score():
 
         # 4. Check if user exists in USER_STATS and insert or update accordingly
         def upsert_user_stats(player, position):
-            cursor.execute("SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn FROM USER_STATS WHERE user_name = %s", (player,))
+            cursor.execute("SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn FROM user_stats WHERE user_name = %s", (player,))
             user_stats = cursor.fetchone()
 
             if user_stats:
@@ -833,7 +833,7 @@ def submit_score():
                 no_of_drawn = no_of_drawn if no_of_drawn is not None else 0
 
                 cursor.execute("""
-                    UPDATE USER_STATS
+                    UPDATE user_stats
                     SET no_of_games_played = no_of_games_played + 1,
                         no_of_won = CASE WHEN %s = 1 THEN no_of_won + 1 ELSE no_of_won END,
                         no_of_lost = CASE WHEN %s = 0 THEN no_of_lost + 1 ELSE no_of_lost END,
@@ -843,7 +843,7 @@ def submit_score():
                 print(f"User stats updated for {player}")
             else:
                 cursor.execute("""
-                    INSERT INTO USER_STATS (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
+                    INSERT INTO user_stats (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
                     VALUES (%s, 1, CASE WHEN %s = 1 THEN 1 ELSE 0 END, CASE WHEN %s = 0 THEN 1 ELSE 0 END, CASE WHEN %s = 0.5 THEN 1 ELSE 0 END, 0)
                 """, (player, position, position, position))
                 print(f"User stats inserted for {player}")
@@ -888,7 +888,7 @@ def purchase_hints():
     cursor = conn.cursor()
 
     # Query to get the user's current coin balance
-    cursor.execute("SELECT coins FROM USER_STATS WHERE user_name = %s", (username,))
+    cursor.execute("SELECT coins FROM user_stats WHERE user_name = %s", (username,))
     user = cursor.fetchone()
 
     if user is None:
@@ -903,7 +903,7 @@ def purchase_hints():
 
     # Deduct coins and update the balance in the database
     new_balance = current_coins - hint_cost
-    cursor.execute("UPDATE USER_STATS SET coins = %s WHERE user_name = %s", (new_balance, username))
+    cursor.execute("UPDATE user_stats SET coins = %s WHERE user_name = %s", (new_balance, username))
     conn.commit()  # Commit the transaction
 
     # Close the cursor and connection
