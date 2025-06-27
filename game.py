@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 from datetime import datetime
 from flask_socketio import SocketIO, emit, join_room
 from dotenv import load_dotenv
+from urllib.parse import urlparse
 import os
 
 
@@ -25,21 +26,20 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 app.secret_key = 'your_secret_key'
-#cred = credentials.Certificate(r'C:\Users\suhia\OneDrive\Desktop\chess dbis minor proj\castle-tactics-75ea9-firebase-adminsdk-uy0le-cdeec9fc32.json')
-
-#firebase_admin.initialize_app(cred)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 's6u2h5i'
-app.config['MYSQL_DB'] = 'castle_tactics'
 
+url = urlparse(os.getenv("DATABASE_URL"))
+
+app.config['MYSQL_HOST'] = url.hostname
+app.config['MYSQL_USER'] = url.username
+app.config['MYSQL_PASSWORD'] = url.password
+app.config['MYSQL_DB'] = url.path[1:]  # strip leading slash
+app.config['MYSQL_PORT'] = url.port or 3306
+
+from flask_mysqldb import MySQL
 mysql = MySQL(app)
-app.wsgi_app= NoCacheMiddleware(app.wsgi_app)
+
 
 def validate_user_id(form, field):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
