@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install required system packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy all project files
+# Copy project files
 COPY . .
 
 # Upgrade pip and install dependencies
@@ -20,6 +20,8 @@ RUN pip install -r requirements.txt
 RUN pip install torch==2.3.1+cu118 torchvision==0.18.1+cu118 torchaudio==2.3.1+cu118 \
     -f https://download.pytorch.org/whl/cu118/torch_stable.html
 
+# Expose the port
+EXPOSE 10000
 
-# Run the app (update with your actual app entry point)
+# Start the application
 CMD ["gunicorn", "game:app", "--bind", "0.0.0.0:10000"]
