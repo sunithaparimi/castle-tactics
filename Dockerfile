@@ -24,5 +24,6 @@ RUN pip install torch==2.3.1+cu118 torchvision==0.18.1+cu118 torchaudio==2.3.1+c
 EXPOSE 10000
 
 # Start the application
-CMD ["gunicorn", "game:app", "--worker-class", "eventlet", "--bind", "0.0.0.0:${PORT}"]
+CMD ["sh", "-c", "gunicorn game:app --worker-class eventlet --bind 0.0.0.0:$PORT"]
+
 
