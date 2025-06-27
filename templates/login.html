@@ -290,39 +290,3 @@
 </section>
     
 {%endblock%}
-{% block scripts %}
-<script type="module" src="firebase-setup.js"></script>
-    <script type="module"> 
-        import { auth, signInWithEmailAndPassword, sendPasswordResetEmail } from './firebase-setup.js';
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.querySelector("form");
-            const emailInput = loginForm.querySelector("input[type='text']");
-            loginForm.addEventListener("submit", async (e) => {
-                e.preventDefault();
-                const email = emailInput.value;
-                const password = loginForm.querySelector("input[type='password']").value;
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    window.location.href = "chatbot.html";
-                } catch (error) {
-                    alert("Failed to login: " + error.message);
-                }
-            });
-            const forgotPassword = document.querySelector(".forgot");
-            forgotPassword.addEventListener("click", async (e) => {
-                e.preventDefault();
-                const email = emailInput.value;
-                if (email) {
-                    try {
-                        await sendPasswordResetEmail(auth, email);
-                        alert("Password reset email sent!");
-                    } catch (error) {
-                        alert("Error: " + error.message);
-                    }
-                } else {
-                    alert("Please enter your email address first.");
-                }
-            });
-        });
-    </script>
-{% endblock %}
