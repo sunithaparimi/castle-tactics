@@ -58,25 +58,6 @@ function initializeGame() {
 
 
 
-// Function to update availability status
-function setAvailability(status) {
-    console.log('Updating availability to:', status);
-    fetch('/update_availability', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userName: userName, availability: status })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Availability updated:', data);
-    })
-    .catch(error => {
-        console.error('Error updating availability:', error);
-    });
-}
-
 // Track page visibility and update availability accordingly
 document.addEventListener('visibilitychange', function() {
     if (document.hidden) {
