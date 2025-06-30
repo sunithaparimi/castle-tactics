@@ -735,14 +735,12 @@ def duringgame():
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     try:
-        # Get data from the frontend (request JSON)
         data = request.json
-        print("Received data:", data)  # Log the received data
+        print("Received data:", data)
 
         if not data:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
-        # Extract variables from the received data
         game_id = data.get('gameId')
         player1 = data.get('whiteUserName')
         player2 = data.get('blackUserName')
@@ -752,125 +750,117 @@ def submit_score():
         end_time = data.get('endTime')
         position1 = data.get('userPositionWhite')
         position2 = data.get('userPositionBlack')
-        mode = data.get('gameMode')  # Optional: mode of the game ('computer' or 'two-player')
+        mode = data.get('gameMode')
 
-        # Log the extracted variables
         print(f"Extracted values: game_id={game_id}, player1={player1}, player2={player2}, "
               f"score1={score1}, score2={score2}, start_time={start_time}, end_time={end_time}, "
               f"position1={position1}, position2={position2}, mode={mode}")
 
-        # Validate the required data
         if not game_id or not player1 or score1 is None or start_time is None or end_time is None or position1 is None:
-            print("Missing required data")  # Log if any required data is missing
             return jsonify({"status": "error", "message": "Missing required data"}), 400
 
-        # Handle computer mode
         if mode == 'computer':
-            print("Game mode is 'computer'. Setting player2, score2, and position2 to None.")
             player2 = None
             score2 = None
             position2 = None
         elif not player2 or score2 is None or position2 is None:
-            print(f"Missing required data for player2 in two-player mode. player2={player2}, score2={score2}, position2={position2}")  # Log missing player2 data
             return jsonify({"status": "error", "message": "Missing required data for player2"}), 400
 
-        # If two-player mode, calculate position2 if missing
         if mode == 'two-player' and position2 is None:
             position2 = 1 if score2 > score1 else 0
-            print(f"Calculated position2 for player2={player2}: {position2}")  # Log position2 calculation
 
-        # Start a database transaction
         cursor = mysql.connection.cursor()
         cursor.execute("START TRANSACTION;")
         print("Transaction started.")
 
-        # 1. Insert or update game details
         cursor.execute("""
-            INSERT INTO game_details (game_id, end_time)
+            INSERT INTO GAME_DETAILS (game_id, end_time)
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
         """, (game_id, end_time))
-        print(f"Game details inserted/updated for game_id={game_id} with end_time={end_time}")
 
-        # 2. Insert into DETAILS_TRANSFER for both players
         cursor.execute("""
-            INSERT INTO details_transfer (user_name, game_id, start_time)
+            INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
             VALUES (%s, %s, %s)
         """, (player1, game_id, start_time))
-        print(f"Details transferred for player1={player1} in game_id={game_id} at start_time={start_time}")
         if player2:
             cursor.execute("""
-                INSERT INTO details_transfer (user_name, game_id, start_time)
+                INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
                 VALUES (%s, %s, %s)
             """, (player2, game_id, start_time))
-            print(f"Details transferred for player2={player2} in game_id={game_id} at start_time={start_time}")
 
-        # 3. Insert into PREVIOUSLY_PLAYED table with scores and positions
         cursor.execute("""
-            INSERT INTO previously_played (game_id, user_name, score, user_position)
+            INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
             VALUES (%s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE score = score + VALUES(score)
         """, (game_id, player1, score1, position1))
-        print(f"Inserted score and position for player1={player1} in game_id={game_id}")
 
         if player2:
             cursor.execute("""
-                INSERT INTO previously_played (game_id, user_name, score, user_position)
+                INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE score = score + VALUES(score)
             """, (game_id, player2, score2, position2))
-            print(f"Inserted score and position for player2={player2} in game_id={game_id}")
 
-        # 4. Check if user exists in USER_STATS and insert or update accordingly
         def upsert_user_stats(player, position):
-            cursor.execute("SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn FROM user_stats WHERE user_name = %s", (player,))
+            cursor.execute("SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn FROM USER_STATS WHERE user_name = %s", (player,))
             user_stats = cursor.fetchone()
 
             if user_stats:
-                no_of_games_played, no_of_won, no_of_lost, no_of_drawn = user_stats
-                no_of_won = no_of_won if no_of_won is not None else 0
-                no_of_lost = no_of_lost if no_of_lost is not None else 0
-                no_of_drawn = no_of_drawn if no_of_drawn is not None else 0
-
                 cursor.execute("""
-                    UPDATE user_stats
+                    UPDATE USER_STATS
                     SET no_of_games_played = no_of_games_played + 1,
                         no_of_won = CASE WHEN %s = 1 THEN no_of_won + 1 ELSE no_of_won END,
                         no_of_lost = CASE WHEN %s = 0 THEN no_of_lost + 1 ELSE no_of_lost END,
                         no_of_drawn = CASE WHEN %s = 0.5 THEN no_of_drawn + 1 ELSE no_of_drawn END
                     WHERE user_name = %s;
                 """, (position, position, position, player))
-                print(f"User stats updated for {player}")
             else:
                 cursor.execute("""
-                    INSERT INTO user_stats (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
+                    INSERT INTO USER_STATS (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
                     VALUES (%s, 1, CASE WHEN %s = 1 THEN 1 ELSE 0 END, CASE WHEN %s = 0 THEN 1 ELSE 0 END, CASE WHEN %s = 0.5 THEN 1 ELSE 0 END, 0)
                 """, (player, position, position, position))
-                print(f"User stats inserted for {player}")
+
+        def update_derived_stats(player):
+            # Update win_percentage
+            cursor.execute("""
+                UPDATE USER_STATS
+                SET win_percentage = 
+                    CASE 
+                        WHEN no_of_games_played > 0 THEN (no_of_won / no_of_games_played) * 100 
+                        ELSE 0 
+                    END
+                WHERE user_name = %s
+            """, (player,))
+
+            # Update avg_score from PREVIOUSLY_PLAYED
+            cursor.execute("SELECT AVG(score) FROM PREVIOUSLY_PLAYED WHERE user_name = %s", (player,))
+            avg_score = cursor.fetchone()[0] or 0
+
+            cursor.execute("UPDATE USER_STATS SET avg_score = %s WHERE user_name = %s", (avg_score, player))
 
         upsert_user_stats(player1, position1)
+        update_derived_stats(player1)
+
         if player2:
             upsert_user_stats(player2, position2)
+            update_derived_stats(player2)
 
-        # 5. Determine the game result and award coins based on the scores
         result1 = 'win' if score1 > score2 else 'lose' if score1 < score2 else 'draw'
         result2 = 'win' if score2 > score1 else 'lose' if score2 < score1 else 'draw'
 
-        # Call the stored procedure to award coins based on game result
         cursor.callproc('update_game_result', [player1, player2, result1])
         cursor.callproc('update_game_result', [player2, player1, result2])
-        print(f"Coins awarded for player1={player1} with result {result1}, player2={player2} with result {result2}")
 
-        # Commit the transaction
         mysql.connection.commit()
-        print("Transaction committed successfully.")
         cursor.close()
 
+        print("Transaction committed successfully.")
         return jsonify({"status": "success"}), 200
 
     except Exception as e:
         mysql.connection.rollback()
-        print(f"Error during transaction: {str(e)}")  # Log the error message
+        print(f"Error during transaction: {str(e)}")
         return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
 
 
