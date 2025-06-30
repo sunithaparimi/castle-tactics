@@ -19,8 +19,6 @@ var board, game = new Chess();
     let formattedEndTimestamp = '';
     let currentGameState = GameState.NOT_STARTED;
 
-    let gameCounter = parseInt(localStorage.getItem('gameCounter')) || 1000;
-
     let userName = 'suhi'; // Replace with actual dynamic user name
 let isPlaying = false;  // Set this to true when the player starts playing a game
 
@@ -112,10 +110,10 @@ window.addEventListener('beforeunload', function() {
     setAvailability(0); // Ensure availability is set to 0 when leaving the page
 });
     function generateGameId(username) {
-        gameCounter++; // Increment the counter
-        localStorage.setItem('gameCounter', gameCounter); // Store the updated counter
-        return `${gameCounter}`; // Return a unique ID based on the username
-    }
+    const uuid = crypto.randomUUID(); 
+    return `game-${uuid}`; 
+}
+
     
     
     function sendGameData(whiteUserName, blackUserName, whiteScore, blackScore, gameId, startTimestamp, endTimestamp, whiteUserPosition, blackUserPosition) {
