@@ -736,8 +736,6 @@ def duringgame():
 def submit_score():
     try:
         data = request.json
-        print("Received data:", data)
-
         if not data:
             return jsonify({"status": "error", "message": "No data received"}), 400
 
@@ -751,10 +749,6 @@ def submit_score():
         position1 = data.get('userPositionWhite')
         position2 = data.get('userPositionBlack')
         mode = data.get('gameMode')
-
-        print(f"Extracted values: game_id={game_id}, player1={player1}, player2={player2}, "
-              f"score1={score1}, score2={score2}, start_time={start_time}, end_time={end_time}, "
-              f"position1={position1}, position2={position2}, mode={mode}")
 
         if not game_id or not player1 or score1 is None or start_time is None or end_time is None or position1 is None:
             return jsonify({"status": "error", "message": "Missing required data"}), 400
@@ -771,97 +765,124 @@ def submit_score():
 
         cursor = mysql.connection.cursor()
         cursor.execute("START TRANSACTION;")
-        print("Transaction started.")
 
+        # Step 1: Insert game
         cursor.execute("""
-            INSERT INTO GAME_DETAILS (game_id, end_time)
+            INSERT INTO game_details (game_id, end_time)
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
         """, (game_id, end_time))
 
+        # Step 2: Insert detail transfers
         cursor.execute("""
-            INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+            INSERT INTO details_transfer (user_name, game_id, start_time)
             VALUES (%s, %s, %s)
         """, (player1, game_id, start_time))
         if player2:
             cursor.execute("""
-                INSERT INTO DETAILS_TRANSFER (user_name, game_id, start_time)
+                INSERT INTO details_transfer (user_name, game_id, start_time)
                 VALUES (%s, %s, %s)
             """, (player2, game_id, start_time))
 
+        # Step 3: Insert previously played
         cursor.execute("""
-            INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+            INSERT INTO previously_played (game_id, user_name, score, user_position)
             VALUES (%s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE score = score + VALUES(score)
         """, (game_id, player1, score1, position1))
 
         if player2:
             cursor.execute("""
-                INSERT INTO PREVIOUSLY_PLAYED (game_id, user_name, score, user_position)
+                INSERT INTO previously_played (game_id, user_name, score, user_position)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE score = score + VALUES(score)
             """, (game_id, player2, score2, position2))
 
+        # Step 4: Update user_stats
         def upsert_user_stats(player, position):
-            cursor.execute("SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn FROM USER_STATS WHERE user_name = %s", (player,))
-            user_stats = cursor.fetchone()
+            cursor.execute("""
+                SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn
+                FROM user_stats WHERE user_name = %s
+            """, (player,))
+            stats = cursor.fetchone()
 
-            if user_stats:
+            if stats:
                 cursor.execute("""
-                    UPDATE USER_STATS
-                    SET no_of_games_played = no_of_games_played + 1,
+                    UPDATE user_stats
+                    SET 
+                        no_of_games_played = no_of_games_played + 1,
                         no_of_won = CASE WHEN %s = 1 THEN no_of_won + 1 ELSE no_of_won END,
                         no_of_lost = CASE WHEN %s = 0 THEN no_of_lost + 1 ELSE no_of_lost END,
                         no_of_drawn = CASE WHEN %s = 0.5 THEN no_of_drawn + 1 ELSE no_of_drawn END
-                    WHERE user_name = %s;
+                    WHERE user_name = %s
                 """, (position, position, position, player))
             else:
                 cursor.execute("""
-                    INSERT INTO USER_STATS (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
-                    VALUES (%s, 1, CASE WHEN %s = 1 THEN 1 ELSE 0 END, CASE WHEN %s = 0 THEN 1 ELSE 0 END, CASE WHEN %s = 0.5 THEN 1 ELSE 0 END, 0)
+                    INSERT INTO user_stats 
+                    (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
+                    VALUES (
+                        %s, 1,
+                        CASE WHEN %s = 1 THEN 1 ELSE 0 END,
+                        CASE WHEN %s = 0 THEN 1 ELSE 0 END,
+                        CASE WHEN %s = 0.5 THEN 1 ELSE 0 END,
+                        0
+                    )
                 """, (player, position, position, position))
 
-        def update_derived_stats(player):
-            # Update win_percentage
+        upsert_user_stats(player1, position1)
+        if player2:
+            upsert_user_stats(player2, position2)
+
+        # Step 5: Recalculate avg_score & win_percentage
+        def recalculate_user_stats(player):
             cursor.execute("""
-                UPDATE USER_STATS
+                UPDATE user_stats
                 SET win_percentage = 
                     CASE 
                         WHEN no_of_games_played > 0 THEN (no_of_won / no_of_games_played) * 100 
                         ELSE 0 
-                    END
+                    END,
+                    avg_score = (
+                        SELECT AVG(score) FROM previously_played WHERE user_name = %s
+                    )
                 WHERE user_name = %s
-            """, (player,))
+            """, (player, player))
 
-            # Update avg_score from PREVIOUSLY_PLAYED
-            cursor.execute("SELECT AVG(score) FROM PREVIOUSLY_PLAYED WHERE user_name = %s", (player,))
-            avg_score = cursor.fetchone()[0] or 0
-
-            cursor.execute("UPDATE USER_STATS SET avg_score = %s WHERE user_name = %s", (avg_score, player))
-
-        upsert_user_stats(player1, position1)
-        update_derived_stats(player1)
-
+        recalculate_user_stats(player1)
         if player2:
-            upsert_user_stats(player2, position2)
-            update_derived_stats(player2)
+            recalculate_user_stats(player2)
 
+        # Step 6: Recalculate ranks for leaderboard (optional)
+        cursor.execute("SET @rank = 0;")
+        cursor.execute("""
+            UPDATE user_stats
+            JOIN (
+                SELECT user_name, @rank := @rank + 1 AS rank
+                FROM user_stats
+                ORDER BY avg_score DESC, win_percentage DESC, coins DESC
+            ) ranked
+            ON user_stats.user_name = ranked.user_name
+            SET user_stats.user_rank = ranked.rank
+        """)
+
+        # Step 7: Update coins via stored procedure
         result1 = 'win' if score1 > score2 else 'lose' if score1 < score2 else 'draw'
         result2 = 'win' if score2 > score1 else 'lose' if score2 < score1 else 'draw'
 
         cursor.callproc('update_game_result', [player1, player2, result1])
-        cursor.callproc('update_game_result', [player2, player1, result2])
+        if player2:
+            cursor.callproc('update_game_result', [player2, player1, result2])
 
         mysql.connection.commit()
         cursor.close()
 
-        print("Transaction committed successfully.")
         return jsonify({"status": "success"}), 200
 
     except Exception as e:
         mysql.connection.rollback()
-        print(f"Error during transaction: {str(e)}")
-        return jsonify({"status": "error", "message": f"Error: {str(e)}"}), 500
+        print(f"Error in submit_score: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 
 @app.route('/purchase_hints', methods=['POST'])
