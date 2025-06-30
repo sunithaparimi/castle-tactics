@@ -28,7 +28,7 @@
     color: #fff; /* White text for contrast */
 }
 
-.ID ,.endgame{
+.ID, .endgame {
   border: solid #ffa500; /* Gold border for a chess-like elegance */
   background-color: #4b4b4b; /* Dark gray for a cohesive look */
   color: #fff; /* White text for contrast */
@@ -37,12 +37,17 @@
   padding-right: 1%;
   margin-right: 1%;
   margin-top: 1%;
-  border-radius: 2vw; /* Adjusted to use vw for proportionate scaling */
+  border-radius: 2vw;
   width: 8vw;
-  height: 4vh; /* Changed from px to vh for height scaling */
+  min-height: 4vh;
   display: flex;
   justify-content: left;
   align-items: center;
+  overflow-wrap: break-word;   /* Break long words */
+  word-wrap: break-word;       /* Support older browsers */
+  white-space: normal;         /* Allow wrapping */
+  line-height: 1.2em;          /* Optional: Better spacing for wrapped lines */
+  text-align: left;            /* Align text within the box */
 }
 
 .endgame
