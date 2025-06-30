@@ -520,18 +520,21 @@ function pieceValues(pieces) {
 
 
     // AI Move
-    function makeBestMove() {
-        positionCount = 0;
-        var depth = 3; // You can adjust the depth
-        var bestMove = minimaxRoot(depth, game, true);
-        game.move(bestMove);
-        board.position(game.fen()); // Ensure board updates after the move
-        // Check if the game is over
-        if (game.game_over()) {
-            alert('Game over');
-        }
-        updateGameState();
+   function makeBestMove() {
+    positionCount = 0;
+    var depth = 3; // You can adjust the depth
+    var bestMove = minimaxRoot(depth, game, true);
+    const move = game.move(bestMove);
+    if (move) {
+        updateScore(move);
     }
+    board.position(game.fen());
+    if (game.game_over()) {
+        alert('Game over');
+    }
+
+    updateGameState();  
+}
 
     // Update game state
     function updateGameState() {
