@@ -801,7 +801,6 @@ def submit_score():
             VALUES (%s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE score = score + VALUES(score)
         """, (game_id, player1, score1, position1))
-
         if player2:
             safe_execute(cursor, """
                 INSERT INTO previously_played (game_id, user_name, score, user_position)
@@ -863,12 +862,12 @@ def submit_score():
         if player2:
             recalculate_user_stats(player2)
 
-        # Step 6: Recalculate leaderboard ranks
+        # Step 6: Recalculate leaderboard ranks (using safe alias)
         safe_execute(cursor, "SET @rank = 0;")
         safe_execute(cursor, "DROP TEMPORARY TABLE IF EXISTS temp_ranks;")
         safe_execute(cursor, """
             CREATE TEMPORARY TABLE temp_ranks AS
-            SELECT user_name, @rank := @rank + 1 AS rank
+            SELECT user_name, @rank := @rank + 1 AS user_rank_temp
             FROM user_stats
             ORDER BY 
                 IFNULL(avg_score, 0) DESC, 
@@ -878,7 +877,7 @@ def submit_score():
         safe_execute(cursor, """
             UPDATE user_stats
             JOIN temp_ranks ON user_stats.user_name = temp_ranks.user_name
-            SET user_stats.user_rank = temp_ranks.rank
+            SET user_stats.user_rank = temp_ranks.user_rank_temp
         """)
 
         # Step 7: Update coins via stored procedure
@@ -900,7 +899,6 @@ def submit_score():
         mysql.connection.rollback()
         print(f"[ERROR in submit_score]: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
-
 
 
 
