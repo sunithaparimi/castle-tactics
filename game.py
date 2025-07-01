@@ -736,13 +736,13 @@ def duringgame():
 def submit_score():
     def safe_execute(cursor, query, values=None):
         try:
-            print("\nExecuting SQL:")
+            print("\n[SQL EXECUTE]")
             print(query.strip())
             if values:
-                print("With values:", values)
+                print("Values:", values)
             cursor.execute(query, values if values else ())
         except Exception as e:
-            print("Query failed:", str(e))
+            print("[SQL ERROR]:", str(e))
             raise
 
     try:
@@ -863,14 +863,17 @@ def submit_score():
         if player2:
             recalculate_user_stats(player2)
 
-        # Step 6: Recalculate ranks using temporary table (fix for error 1064)
+        # Step 6: Recalculate leaderboard ranks
         safe_execute(cursor, "SET @rank = 0;")
         safe_execute(cursor, "DROP TEMPORARY TABLE IF EXISTS temp_ranks;")
         safe_execute(cursor, """
             CREATE TEMPORARY TABLE temp_ranks AS
             SELECT user_name, @rank := @rank + 1 AS rank
             FROM user_stats
-            ORDER BY avg_score DESC, win_percentage DESC, coins DESC
+            ORDER BY 
+                IFNULL(avg_score, 0) DESC, 
+                IFNULL(win_percentage, 0) DESC, 
+                IFNULL(coins, 0) DESC
         """)
         safe_execute(cursor, """
             UPDATE user_stats
@@ -895,8 +898,10 @@ def submit_score():
 
     except Exception as e:
         mysql.connection.rollback()
-        print(f"\n[SERVER ERROR] in submit_score: {str(e)}")
+        print(f"[ERROR in submit_score]: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
 
 
 @app.route('/purchase_hints', methods=['POST'])
