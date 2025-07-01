@@ -852,17 +852,19 @@ def submit_score():
         if player2:
             recalculate_user_stats(player2)
 
-        # Step 6: Recalculate ranks for leaderboard (optional)
+        # ✅ Step 6: Recalculate ranks using temporary table
         cursor.execute("SET @rank = 0;")
+        cursor.execute("DROP TEMPORARY TABLE IF EXISTS temp_ranks;")
+        cursor.execute("""
+            CREATE TEMPORARY TABLE temp_ranks AS
+            SELECT user_name, @rank := @rank + 1 AS rank
+            FROM user_stats
+            ORDER BY avg_score DESC, win_percentage DESC, coins DESC;
+        """)
         cursor.execute("""
             UPDATE user_stats
-            JOIN (
-                SELECT user_name, @rank := @rank + 1 AS rank
-                FROM user_stats
-                ORDER BY avg_score DESC, win_percentage DESC, coins DESC
-            ) ranked
-            ON user_stats.user_name = ranked.user_name
-            SET user_stats.user_rank = ranked.rank
+            JOIN temp_ranks ON user_stats.user_name = temp_ranks.user_name
+            SET user_stats.user_rank = temp_ranks.rank;
         """)
 
         # Step 7: Update coins via stored procedure
