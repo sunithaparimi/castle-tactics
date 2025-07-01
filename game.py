@@ -734,6 +734,17 @@ def duringgame():
 
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
+    def safe_execute(cursor, query, values=None):
+        try:
+            print("\nExecuting SQL:")
+            print(query.strip())
+            if values:
+                print("With values:", values)
+            cursor.execute(query, values if values else ())
+        except Exception as e:
+            print("Query failed:", str(e))
+            raise
+
     try:
         data = request.json
         if not data:
@@ -764,35 +775,35 @@ def submit_score():
             position2 = 1 if score2 > score1 else 0
 
         cursor = mysql.connection.cursor()
-        cursor.execute("START TRANSACTION;")
+        safe_execute(cursor, "START TRANSACTION;")
 
         # Step 1: Insert game
-        cursor.execute("""
+        safe_execute(cursor, """
             INSERT INTO game_details (game_id, end_time)
             VALUES (%s, %s)
             ON DUPLICATE KEY UPDATE end_time = VALUES(end_time)
         """, (game_id, end_time))
 
         # Step 2: Insert detail transfers
-        cursor.execute("""
+        safe_execute(cursor, """
             INSERT INTO details_transfer (user_name, game_id, start_time)
             VALUES (%s, %s, %s)
         """, (player1, game_id, start_time))
         if player2:
-            cursor.execute("""
+            safe_execute(cursor, """
                 INSERT INTO details_transfer (user_name, game_id, start_time)
                 VALUES (%s, %s, %s)
             """, (player2, game_id, start_time))
 
         # Step 3: Insert previously played
-        cursor.execute("""
+        safe_execute(cursor, """
             INSERT INTO previously_played (game_id, user_name, score, user_position)
             VALUES (%s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE score = score + VALUES(score)
         """, (game_id, player1, score1, position1))
 
         if player2:
-            cursor.execute("""
+            safe_execute(cursor, """
                 INSERT INTO previously_played (game_id, user_name, score, user_position)
                 VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE score = score + VALUES(score)
@@ -800,14 +811,14 @@ def submit_score():
 
         # Step 4: Update user_stats
         def upsert_user_stats(player, position):
-            cursor.execute("""
+            safe_execute(cursor, """
                 SELECT no_of_games_played, no_of_won, no_of_lost, no_of_drawn
                 FROM user_stats WHERE user_name = %s
             """, (player,))
             stats = cursor.fetchone()
 
             if stats:
-                cursor.execute("""
+                safe_execute(cursor, """
                     UPDATE user_stats
                     SET 
                         no_of_games_played = no_of_games_played + 1,
@@ -817,7 +828,7 @@ def submit_score():
                     WHERE user_name = %s
                 """, (position, position, position, player))
             else:
-                cursor.execute("""
+                safe_execute(cursor, """
                     INSERT INTO user_stats 
                     (user_name, no_of_games_played, no_of_won, no_of_lost, no_of_drawn, coins)
                     VALUES (
@@ -835,7 +846,7 @@ def submit_score():
 
         # Step 5: Recalculate avg_score & win_percentage
         def recalculate_user_stats(player):
-            cursor.execute("""
+            safe_execute(cursor, """
                 UPDATE user_stats
                 SET win_percentage = 
                     CASE 
@@ -852,27 +863,29 @@ def submit_score():
         if player2:
             recalculate_user_stats(player2)
 
-        # ✅ Step 6: Recalculate ranks using temporary table
-        cursor.execute("SET @rank = 0;")
-        cursor.execute("DROP TEMPORARY TABLE IF EXISTS temp_ranks;")
-        cursor.execute("""
+        # Step 6: Recalculate ranks using temporary table (fix for error 1064)
+        safe_execute(cursor, "SET @rank = 0;")
+        safe_execute(cursor, "DROP TEMPORARY TABLE IF EXISTS temp_ranks;")
+        safe_execute(cursor, """
             CREATE TEMPORARY TABLE temp_ranks AS
             SELECT user_name, @rank := @rank + 1 AS rank
             FROM user_stats
-            ORDER BY avg_score DESC, win_percentage DESC, coins DESC;
+            ORDER BY avg_score DESC, win_percentage DESC, coins DESC
         """)
-        cursor.execute("""
+        safe_execute(cursor, """
             UPDATE user_stats
             JOIN temp_ranks ON user_stats.user_name = temp_ranks.user_name
-            SET user_stats.user_rank = temp_ranks.rank;
+            SET user_stats.user_rank = temp_ranks.rank
         """)
 
         # Step 7: Update coins via stored procedure
         result1 = 'win' if score1 > score2 else 'lose' if score1 < score2 else 'draw'
         result2 = 'win' if score2 > score1 else 'lose' if score2 < score1 else 'draw'
 
+        print(f"Calling stored procedure: update_game_result({player1}, {player2}, {result1})")
         cursor.callproc('update_game_result', [player1, player2, result1])
         if player2:
+            print(f"Calling stored procedure: update_game_result({player2}, {player1}, {result2})")
             cursor.callproc('update_game_result', [player2, player1, result2])
 
         mysql.connection.commit()
@@ -882,9 +895,8 @@ def submit_score():
 
     except Exception as e:
         mysql.connection.rollback()
-        print(f"Error in submit_score: {str(e)}")
+        print(f"\n[SERVER ERROR] in submit_score: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
-
 
 
 @app.route('/purchase_hints', methods=['POST'])
